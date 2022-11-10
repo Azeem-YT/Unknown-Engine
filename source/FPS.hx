@@ -1,0 +1,84 @@
+package;
+
+import haxe.Timer;
+import openfl.events.Event;
+import openfl.text.TextField;
+import openfl.text.TextFormat;
+import flixel.math.FlxMath;
+import openfl.system.System;
+import openfl.display._internal.stats.Context3DStats;
+import openfl.display._internal.stats.DrawCallContext;
+import openfl.Lib;
+
+class FPS extends TextField
+{
+	public var currentFPS(default, null):Int;
+
+	private var cacheCount:Int;
+	private var currentTime:Float;
+	private var times:Array<Float>;
+	private var memoryCount:Float;
+	private var maxMemory:Float;
+
+	public function new(x:Float = 10, y:Float = 10, color:Int = 0x000000)
+	{
+		super();
+
+		this.x = x;
+		this.y = y;
+
+		currentFPS = 0;
+		selectable = false;
+		mouseEnabled = false;
+		defaultTextFormat = new TextFormat("_sans", 13, color);
+		autoSize = LEFT;
+		text = "FPS: ";
+
+		cacheCount = 0;
+		currentTime = 0;
+		times = [];
+
+		addEventListener(Event.ENTER_FRAME, function(e)
+		{
+			var time = Lib.getTimer();
+			__enterFrame(time - currentTime);
+		});
+	}
+
+	// Event Handlers
+	private override function __enterFrame(deltaTime:Float):Void
+	{
+		currentTime += deltaTime;
+		times.push(currentTime);
+
+		while (times[0] < currentTime - 1000)
+		{
+			times.shift();
+		}
+
+		var currentCount = times.length;
+		currentFPS = Math.round((currentCount + cacheCount) / 2);
+
+		visible = true;
+		alpha = 1;
+
+		if (currentCount != cacheCount)
+		{
+			memoryCount = Math.abs(FlxMath.roundDecimal(System.totalMemory / 1000000, 1));
+			if (maxMemory < memoryCount)
+				maxMemory = memoryCount;
+
+			text = "FPS: " + currentFPS + '\nMemory: ' + memoryCount + ' MB\nMax Memory: ' + maxMemory + ' MB';
+
+			textColor = 0xFFFFFFFF;
+
+			#if (gl_stats && !disable_cffi && (!html5 || !canvas))
+			text += "\ntotalDC: " + Context3DStats.totalDrawCalls();
+			text += "\nstageDC: " + Context3DStats.contextDrawCalls(DrawCallContext.STAGE);
+			text += "\nstage3DDC: " + Context3DStats.contextDrawCalls(DrawCallContext.STAGE3D);
+			#end
+		}
+
+		cacheCount = currentCount;
+	}
+}

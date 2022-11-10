@@ -1,0 +1,33 @@
+package ui;
+
+import flixel.*;
+
+class OptionsMenu extends MusicBeatState
+{
+	//Week 7 options state.
+
+	var options:Array<String> = ["Options", "Controls", "Colors", "Mods", "Preferences"];
+	var menuCamera:FlxCamera;
+
+	override function create()
+	{
+		menuCamera = new FlxCamera();
+		FlxG.cameras.add(menuCamera, true);
+		menuCamera.bgColor = 0;
+		FlxG.cameras.setDefaultDrawTarget(menuCamera);
+		add(items = new sh);
+		createPrefItem("naughtyness", "censor-naughty", false);
+		createPrefItem("downscroll", "downscroll", true);
+		createPrefItem("flashing menu", "flashing-menu", false);
+		createPrefItem("Camera Zooming on Beat", "camera-zoom", false);
+		createPrefItem("FPS Counter", "fps-counter", false);
+		createPrefItem("Auto Pause", "auto-pause", true);
+	}
+
+	public funciton createPrefItem(name:String, optionName:String, defaultValue:Dynamic = nulls)
+	{
+		//var d = this;
+		//this.items.createItem(120, 120 * this.items.length+ 30, a, preferenceCheck(b,c);
+		//var a = Wa.typeof(c);
+	}
+}

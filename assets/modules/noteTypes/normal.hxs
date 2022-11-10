@@ -1,0 +1,3 @@
+setHealthGain(0.04);
+setHealthLoss(0.05);
+setHitCauseMiss(false);
