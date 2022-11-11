@@ -56,11 +56,8 @@ class TitleState extends MusicBeatState
 		SaveData.checkKeybinds();
 		SaveData.checkVars();
 
-		if (FlxG.save.data.fpsCounter)
-		{
-			Main.getFPSCounter();
-			Main.setFPSVisible();
-		}
+		Main.getFPSCounter();
+		Main.setFPSVisible();
 
 		var fpsR:Float = FlxG.save.data.fpsR;
 
@@ -261,14 +258,6 @@ class TitleState extends MusicBeatState
 
 		if (pressedEnter && !transitioning && skippedIntro)
 		{
-			#if !switch
-			NGio.unlockMedal(60960);
-
-			// If it's Friday according to da clock
-			if (Date.now().getDay() == 5)
-				NGio.unlockMedal(61034);
-			#end
-
 			titleText.animation.play('press');
 
 			FlxG.camera.flash(FlxColor.WHITE, 1);
@@ -278,9 +267,8 @@ class TitleState extends MusicBeatState
 			// FlxG.sound.music.stop();
 
 			new FlxTimer().start(2, function(tmr:FlxTimer)
-			{
-				
-				FlxG.switchState(new DownscrollSubState());
+			{			
+				FlxG.switchState(new MainMenuState());
 			});
 			// FlxG.sound.play(Paths.music('titleShoot'), 0.7);
 		}

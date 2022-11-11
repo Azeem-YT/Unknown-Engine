@@ -110,8 +110,7 @@ class Main extends Sprite
 
 	public static function setFPSVisible()
 	{
-		if (framerateCounter != null)
-			framerateCounter.visible = FlxG.save.data.fps;
+		framerateCounter.visible = FlxG.save.data.fpsCounter;
 	}
 
 	public function gameCrashed(errorMsg:UncaughtErrorEvent)

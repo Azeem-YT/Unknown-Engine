@@ -46,7 +46,7 @@ class OptionsState extends MusicBeatState
 		catagorys = [
 			'main'=> [
 				[
-					['preferences', changeGroup],
+					['preferences', switchPref],
 					['controls', openKeymenu],
 					['Exit', exitMenu]
 				]
@@ -318,6 +318,20 @@ class OptionsState extends MusicBeatState
 			});
 		}
 	}
+
+	public function switchPref()
+	{
+		if (controls.ACCEPT)
+		{
+			FlxG.sound.play(Paths.sound('confirmMenu'));
+			disableInput = true;
+			FlxFlicker.flicker(curSubGroup.members[curSelection], 0.5, 0.06 * 2, true, false, function(flick:FlxFlicker)
+			{
+				FlxG.switchState(new OptionPrefs());
+				disableInput = false;
+			});
+		}
+	}
 }
 
 class KeyBindState extends MusicBeatState
@@ -535,12 +549,172 @@ class KeyBindState extends MusicBeatState
 	}
 }
 
-class OptionData
+class OptionPrefs extends MusicBeatState
 {
-	public var optionName:String;
-
-	public function new(optionName:String)
+	var alphaOptions:FlxTypedGroup<Alphabet>;
+	var options:Array<String> = [];
+	var optionsVars:Array<Bool> = [];
+	var curSelected:Int = 0;
+	var curOption:String = "";
+	
+	override function create()
 	{
-		this.optionName = optionName;
+		transIn = FlxTransitionableState.defaultTransIn;
+		transOut = FlxTransitionableState.defaultTransOut;
+
+		var bg:FlxSprite = new FlxSprite(-80).loadGraphic(Paths.image('menuDesat'));
+		bg.scrollFactor.x = 0;
+		bg.scrollFactor.y = 0.18;
+		bg.setGraphicSize(Std.int(bg.width * 1.1));
+		bg.updateHitbox();
+		bg.screenCenter();
+		bg.antialiasing = true;
+		add(bg);
+
+		alphaOptions = generateOptions();
+
+		changeSelection();
+	}
+
+	private function generateOptions():FlxTypedGroup<Alphabet>
+	{
+		alphaOptions = new FlxTypedGroup<Alphabet>();
+
+		for (option in Main.gameSettings.gameSettingInfo.keys())
+		{
+			options.push(Main.gameSettings.gameSettingInfo.get(option)[0]);
+			optionsVars.push(Main.gameSettings.gameSettingInfo.get(option)[1]);
+		}
+
+		for (i in 0...options.length)
+		{
+			var optionText:Alphabet = new Alphabet(0, 0, options[i] + ' ' + optionsVars[i], true, false);
+			optionText.screenCenter();
+			optionText.targetY = i;
+			optionText.alpha = 0.6;
+
+			alphaOptions.add(optionText);
+		}
+
+		for (i in 0...alphaOptions.length)
+		{
+			alphaOptions.members[i].y = (70 * 1.1 * i) + 30 - 12.5;
+			alphaOptions.members[i].x = alphaOptions.members[i].x - 10;
+		}
+
+		alphaOptions.members[curSelected].alpha = 1;
+
+		add(alphaOptions);
+
+		return alphaOptions;
+	}
+
+	function changeSelection(?change:Int = 0) //stolen from freeplay lmaoooo
+	{
+		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+
+		curSelected += change;
+
+		if (curSelected < 0)
+			curSelected = options.length - 1;
+		if (curSelected >= options.length)
+			curSelected = 0;
+
+		curOption = options[curSelected];
+
+		var bullShit:Int = 0;
+
+		for (item in alphaOptions.members)
+		{
+			item.targetY = bullShit - curSelected;
+			bullShit++;
+
+			item.alpha = 0.6;
+
+			if (item.targetY == 0)
+			{
+				item.alpha = 1;
+				//Sex
+			}
+		}
+	}
+
+	override function update(elapsed:Float)
+	{
+		var upP = controls.UI_UP_P;
+		var downP = controls.UI_DOWN_P;
+		var accepted = controls.ACCEPT;
+
+		if (upP)
+		{
+			changeSelection(-1);
+		}
+		if (downP)
+		{
+			changeSelection(1);
+		}
+
+		if (controls.BACK)
+				FlxG.switchState(new OptionsState());
+
+		if (accepted)
+		{
+			FlxG.sound.play(Paths.sound('confirmMenu'));
+
+			FlxFlicker.flicker(alphaOptions.members[curSelected], 0.5, 0.12, true, false, function(flicker:FlxFlicker)
+			{
+				setVar();
+			});
+		}
+
+		super.update(elapsed);
+	}
+
+	private function resetAlpha()
+	{	
+		options = [];
+		optionsVars = [];
+		if (alphaOptions != null)
+		{
+			remove(alphaOptions);
+
+			alphaOptions = generateOptions();
+		}
+	}
+
+	function setVar()
+	{
+		switch (curOption)
+		{
+			case 'Downscroll':
+				FlxG.save.data.downscroll = !optionsVars[curSelected];
+				trace("Chosen Downscroll");
+			case 'Middlescroll':
+				FlxG.save.data.middlescroll = !optionsVars[curSelected];
+				trace("Chosen Middlescroll");
+			case 'FPS Counter':
+				FlxG.save.data.fpsCounter = !optionsVars[curSelected];
+				Main.setFPSVisible();
+				trace("Chosen Fps Counter");
+			case 'Ghost Tapping':
+				FlxG.save.data.ghostTapping = !optionsVars[curSelected];
+				trace("Chosen Ghost Tapping");
+			default:
+				trace("Chosen Option doesn't exist");
+		}
+
+		Main.gameSettings.saveSettings();
+
+		resetAlpha();
 	}
 }
+
+//class OptionData
+//{
+//	public var optionName:String;
+//
+//	public function new(optionName:String)
+//	{
+//		this.optionName = optionName;
+//	}
+//}

@@ -24,7 +24,7 @@ class OptionsMenu extends MusicBeatState
 		createPrefItem("Auto Pause", "auto-pause", true);
 	}
 
-	public funciton createPrefItem(name:String, optionName:String, defaultValue:Dynamic = nulls)
+	public funciton createPrefItem(name:String, optionName:String, defaultValue:Dynamic = null)
 	{
 		//var d = this;
 		//this.items.createItem(120, 120 * this.items.length+ 30, a, preferenceCheck(b,c);

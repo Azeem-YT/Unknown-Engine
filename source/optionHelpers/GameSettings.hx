@@ -25,26 +25,31 @@ class GameSettings
 	public var keyBlacklist:Array<String> = ["ENTER", "ESCAPE", "BACKSPACE"];
 	public var gameSettingInfo:Map<String, Dynamic> = [
 		'Downscroll' => [
+			'Downscroll',
 			FlxG.save.data.downscroll,
 			Checkmark,
 			'If Checked, the strumline will be flipped vertically.'
 		],
 		'Middlescroll' => [
+			'Middlescroll',
 			FlxG.save.data.middlescroll,
 			Checkmark,
 			'If Checked, the strumline will be on the middle of the screen.'
 		],
 		'FPS Counter' => [
+			'FPS Counter',
 			FlxG.save.data.fpsCounter,
 			Checkmark,
 			'If Checked, an Fps Counter will apear on the top left of the game.'
 		],
 		'Ghost Tapping' => [
+			'Ghost Tapping',
 			FlxG.save.data.ghostTapping,
 			Checkmark,
 			'If Checked, Ghost Tapping allowing you to press inputs without missing.'
 		],
 		'Play Opponent Side' => [
+			'Play Opponent Side',
 			FlxG.save.data.opponentSide,
 			Checkmark,
 			"Play the opponent's side instead of the player's side!"
@@ -89,6 +94,39 @@ class GameSettings
 
 	public function saveSettings()
 	{
+		gameSettingInfo = [
+			'Downscroll' => [
+				'Downscroll',
+				FlxG.save.data.downscroll,
+				Checkmark,
+				'If Checked, the strumline will be flipped vertically.'
+			],
+			'Middlescroll' => [
+				'Middlescroll',
+				FlxG.save.data.middlescroll,
+				Checkmark,
+				'If Checked, the strumline will be on the middle of the screen.'
+			],
+			'FPS Counter' => [
+				'FPS Counter',
+				FlxG.save.data.fpsCounter,
+				Checkmark,
+				'If Checked, an Fps Counter will apear on the top left of the game.'
+			],
+			'Ghost Tapping' => [
+				'Ghost Tapping',
+				FlxG.save.data.ghostTapping,
+				Checkmark,
+				'If Checked, Ghost Tapping allowing you to press inputs without missing.'
+			],
+			'Play Opponent Side' => [
+				'Play Opponent Side',
+				FlxG.save.data.opponentSide,
+				Checkmark,
+				"Play the opponent's side instead of the player's side!"
+			]
+		];
+
 		FlxG.save.data.saveSettings = trueSettings;
 
 		var stringSetting:Array<String> = [];

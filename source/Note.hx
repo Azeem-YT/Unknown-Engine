@@ -184,6 +184,9 @@ class Note extends FlxSprite
 			noteScore * 0.2;
 			alpha = 0.6;
 
+			if (Main.gameSettings.getSettingBool("Middlescroll") && !isPlayer)
+				alpha = 0;
+
 			switch (noteData)
 			{
 				case 2:
@@ -408,6 +411,9 @@ class Note extends FlxSprite
 					antialiasing = FlxG.save.data.antialiasing;
 			}
 		}
+
+		if (Main.gameSettings.getSettingBool("Middlescroll") && !isPlayer)
+			alpha = 0;
 	}
 
 	function loadAnimations()

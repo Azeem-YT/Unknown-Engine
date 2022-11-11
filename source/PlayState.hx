@@ -1649,7 +1649,7 @@ class PlayState extends MusicBeatState
 		{
 			var noteTextureString:String;
 
-			var babyArrow:Strum = new Strum(0, strumLine.y, i, false);
+			var babyArrow:Strum = new Strum((Main.gameSettings.getSettingBool("Middlescroll") ? -278 : 0), strumLine.y, i, false);
 
 			switch (SONG.noteOpponentTexture)
 			{
@@ -1790,6 +1790,9 @@ class PlayState extends MusicBeatState
 			babyArrow.x += 50;
 			babyArrow.x += ((FlxG.width / 2) * 0);
 
+			if (Main.gameSettings.getSettingBool("Middlescroll"))
+				babyArrow.x -= 300;
+
 			if (threePlayer)
 			{
 				switch (i)
@@ -1820,7 +1823,7 @@ class PlayState extends MusicBeatState
 		{
 			var noteTextureString:String;
 
-			var babyArrow:Strum = new Strum(0, opponentStrums.members[i].y, i, true);
+			var babyArrow:Strum = new Strum((Main.gameSettings.getSettingBool("Middlescroll") ? -278 : 0), opponentStrums.members[i].y, i, true);
 
 			switch (SONG.noteOpponentTexture)
 			{

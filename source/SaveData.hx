@@ -92,6 +92,8 @@ class SaveData
 			FlxG.save.data.ghostTapping = true;
 		if (FlxG.save.data.fpsCounter == null)
 			FlxG.save.data.fpsCounter = true;
+		if (FlxG.save.data.opponentSide ==  null)
+			FlxG.save.data.opponentSide = true;
 		if (FlxG.save.data.fpsR == null)
 			FlxG.save.data.fpsR = 144.0;
 	}
