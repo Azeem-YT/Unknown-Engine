@@ -93,7 +93,7 @@ class SaveData
 		if (FlxG.save.data.fpsCounter == null)
 			FlxG.save.data.fpsCounter = true;
 		if (FlxG.save.data.opponentSide ==  null)
-			FlxG.save.data.opponentSide = true;
+			FlxG.save.data.opponentSide = false;
 		if (FlxG.save.data.fpsR == null)
 			FlxG.save.data.fpsR = 144.0;
 	}
