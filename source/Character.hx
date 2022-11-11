@@ -503,8 +503,8 @@ class Character extends FlxSprite
 				addOffset('singRIGHTmiss', -1, -3);
 				addOffset('singLEFTmiss', -30, 16);
 				addOffset('singDOWNmiss', 69, -99);
-				addOffset('singUP-alt', 24, 56);
-				addOffset('singDOWN-alt', 98, -90);
+				addOffset('singUP-alt');
+				addOffset('singDOWN-alt');
 
 				playAnim("idle");
 

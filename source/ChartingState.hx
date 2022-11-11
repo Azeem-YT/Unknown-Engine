@@ -1035,7 +1035,7 @@ class ChartingState extends MusicBeatState
 			var daSus:Dynamic = i[2];
 			var noteType = i[3];
 
-			var note:Note = new Note(daStrumTime, daNoteInfo % 4, null, null, null, noteType);
+			var note:Note = new Note(daStrumTime, daNoteInfo % 4, null, null, null, noteType, true);
 			note.isThreePlayerNote = (daNoteInfo > 7);
 			note.sustainLength = daSus;
 			note.setGraphicSize(GRID_SIZE, GRID_SIZE);

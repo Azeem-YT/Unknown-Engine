@@ -71,6 +71,7 @@ class Note extends FlxSprite
 	public static var vars:StringMap<Dynamic>;
 
 	public var customAnims:Bool = false;
+	public var inCharter:Bool = false;
 
 	public var daAnims:Array<String> = [];
 	public var isThreePlayerNote:Bool = false;
@@ -99,7 +100,7 @@ class Note extends FlxSprite
 		return daNoteType;
 	}
 
-	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false, ?isPlayer:Bool, noteType:String = 'none')
+	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false, ?isPlayer:Bool, noteType:String = 'none', ?inCharter:Bool = false)
 	{
 		super();
 
@@ -109,6 +110,7 @@ class Note extends FlxSprite
 		this.prevNote = prevNote;
 		isSustainNote = sustainNote;
 		this.isPlayer = isPlayer;
+		this.inCharter = inCharter;
 
 		if (noteType != null && noteType != "none" && noteType != "")
 			this.noteType = noteType;
@@ -184,7 +186,7 @@ class Note extends FlxSprite
 			noteScore * 0.2;
 			alpha = 0.6;
 
-			if (Main.gameSettings.getSettingBool("Middlescroll") && !isPlayer)
+			if (Main.gameSettings.getSettingBool("Middlescroll") && !isPlayer && !inCharter)
 				alpha = 0;
 
 			switch (noteData)
@@ -412,7 +414,7 @@ class Note extends FlxSprite
 			}
 		}
 
-		if (Main.gameSettings.getSettingBool("Middlescroll") && !isPlayer)
+		if (Main.gameSettings.getSettingBool("Middlescroll") && !isPlayer && !inCharter)
 			alpha = 0;
 	}
 

@@ -960,10 +960,13 @@ class PlayState extends MusicBeatState
 				gf.x += 180;
 				gf.y += 300;
 			case 'tank':
-				if (gf.curCharacter == 'pico-speaker')
+				switch (gf.curCharacter)
 				{
-					gf.y -= 150;
-					gf.x -= 100;
+					case 'pico-speaker':
+						gf.y -= 150;
+						gf.x -= 100;
+					default:
+						gf.x -= 200;
 				}
 		}
 

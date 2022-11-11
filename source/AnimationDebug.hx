@@ -190,6 +190,9 @@ class AnimationDebug extends FlxState
 			char.playAnim(animList[curAnim]);
 		}
 
+		if (FlxG.keys.justPressed.ESCAPE)
+			FlxG.switchState(new PlayState());
+
 		super.update(elapsed);
 	}
 }
