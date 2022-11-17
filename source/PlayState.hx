@@ -93,6 +93,9 @@ class PlayState extends MusicBeatState
 	public static var olddadX:Float = 100;
 	public static var olddadY:Float = 100;
 
+	public static var usingPractice:Bool = false;
+	public static var usedPractice:Bool = false;
+
 	public static var strumLineY:Float;
 
 	var halloweenLevel:Bool = false;
@@ -235,6 +238,10 @@ class PlayState extends MusicBeatState
 
 	public var moduleHandler:ModuleHandler;
 
+	public var diffArray:Array<String> = ['easy', 'normal', 'hard'];
+
+	public var diffText:String = '';
+
 	override public function create()
 	{
 		instance = this;
@@ -305,17 +312,15 @@ class PlayState extends MusicBeatState
 				dialogue = CoolUtil.coolTextFile(Paths.txt('data/thorns/thornsDialogue'));
 		}
 
+		diffText = '-' + diffArray[storyDifficulty];
+
+		if (diffText == '-normal')
+			diffText = '';
+
 		#if desktop
 		// Making difficulty text for Discord Rich Presence.
-		switch (storyDifficulty)
-		{
-			case 0:
-				storyDifficultyText = "Easy";
-			case 1:
-				storyDifficultyText = "Normal";
-			case 2:
-				storyDifficultyText = "Hard";
-		}
+
+		storyDifficultyText = diffText;
 
 		iconRPC = SONG.player2;
 
@@ -423,7 +428,7 @@ class PlayState extends MusicBeatState
 
 		var directorys:Array<String> = [Paths.getPreloadPath()];
 
-		#if MODDING_ALLOWED
+		#if desktop
 		directorys.push(Paths.getModPreloadPath());
 		#end
 
@@ -823,7 +828,7 @@ class PlayState extends MusicBeatState
 		var filesPushed:Array<String> = [];
 		var foldersToCheck:Array<String> = [Paths.getPreloadPath('scripts/')];
 
-		#if MODDING_ALLOWED
+		#if desktop
 		foldersToCheck.insert(0, Paths.mods('scripts/'));
 		#end
 
@@ -842,7 +847,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		#if MODDING_ALLOWED
+		#if desktop
 		var path:String = SONG.stage;
 		var tracedPath:String = Paths.stageLua(path);
 		if (FileSystem.exists(Paths.stageLua(path)))
@@ -960,6 +965,7 @@ class PlayState extends MusicBeatState
 				gf.x += 180;
 				gf.y += 300;
 			case 'tank':
+				dad.x -= 100;
 				switch (gf.curCharacter)
 				{
 					case 'pico-speaker':
@@ -991,8 +997,6 @@ class PlayState extends MusicBeatState
 		{
 			case 'limo':
 				add(limo);
-			//case 'tank':
-			//	add(foregroundSprites);
 		}
 
 		add(dad);
@@ -1084,7 +1088,7 @@ class PlayState extends MusicBeatState
 		scoreTxt.scrollFactor.set();
 		add(scoreTxt);
 
-		timeText = new FlxText(FlxG.width / 2  - 248, 19 + 25, 400, "0:00", 60);
+		timeText = new FlxText(FlxG.width / 2  - 248, strumLine.y, 400, "0:00", 60);
 		timeText.setFormat(Paths.font("vcr.ttf"), 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		timeText.scrollFactor.set();
 		timeText.alpha = 1;
@@ -1092,11 +1096,11 @@ class PlayState extends MusicBeatState
 		timeText.cameras = [camHUD];
 		add(timeText); //Time Elapsed;
 
-		iconP1 = new HealthIcon(SONG.player1, true);
+		iconP1 = new HealthIcon(boyfriend.healthIcon, true);
 		iconP1.y = healthBar.y - (iconP1.height / 2);
 		add(iconP1);
 
-		iconP2 = new HealthIcon(SONG.player2, false);
+		iconP2 = new HealthIcon(dad.healthIcon, false);
 		iconP2.y = healthBar.y - (iconP2.height / 2);
 		add(iconP2);
 
@@ -1473,14 +1477,13 @@ class PlayState extends MusicBeatState
 		previousFrameTime = FlxG.game.ticks;
 		lastReportedPlayheadPosition = 0;
 
-		if (!paused)
-			if (FileSystem.exists(Paths.modinst(SONG.song.toLowerCase())))
-			{
-				FlxG.sound.playMusic(Paths.modinst(PlayState.SONG.song.toLowerCase()), 1, false);
-			}
-			else
-				FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song.toLowerCase()), 1, false);
+		var directorys:Array<String> = [Paths.getPreloadPath()];
 
+		#if desktop
+		directorys.push(Paths.getModPreloadPath());
+		#end
+
+		FlxG.sound.playMusic(Paths.inst(PlayState.SONG.song), 1, false);
 		FlxG.sound.music.onComplete = endSong;
 		vocals.play();
 
@@ -1521,10 +1524,7 @@ class PlayState extends MusicBeatState
 		songSpeed = songData.speed;
 
 		if (SONG.needsVoices)
-			if (FileSystem.exists(Paths.modvoices(PlayState.SONG.song)))
-				vocals = new FlxSound().loadEmbedded(Paths.modvoices(PlayState.SONG.song));
-			else 
-				vocals = new FlxSound().loadEmbedded(Paths.voices(PlayState.SONG.song));
+			vocals = new FlxSound().loadEmbedded(Paths.voices(PlayState.SONG.song));
 		else
 			vocals = new FlxSound();
 
@@ -1615,20 +1615,9 @@ class PlayState extends MusicBeatState
 					}
 
 					sustainNote.mustPress = (isThirdPlayer ? false : gottaHitNote);
-
-					if (sustainNote.mustPress)
-					{
-						sustainNote.x += FlxG.width / 2 + sustainNote.noteXOffset; // general offset
-					}
 				}
 
 				swagNote.mustPress = (isThirdPlayer ? false : gottaHitNote);
-
-				if (swagNote.mustPress)
-				{
-					swagNote.x += FlxG.width / 2; // general offset
-				}
-				else {}
 			}
 			daBeats += 1;
 		}
@@ -2322,8 +2311,7 @@ class PlayState extends MusicBeatState
 
 		for (module in updateScript) {
 			if (module.isAlive && module.exists('onUpdate')) {
-				module.get('onUpdate')(elapsed);
-				trace("Les Goooooo");
+				module.get('onUpdate')();
 			} else
 				updateScript.splice(updateScript.indexOf(module), 1);
 		}
@@ -2637,13 +2625,15 @@ class PlayState extends MusicBeatState
 					if (daNote.isThreePlayerNote && SONG.threePlayer)
 					{
 						gfStrums.members[daNote.noteData].playCharAnim(useAltAnim);
+						gfStrumAnim(daNote.noteData);
 					}
 					else
 					{
 						opponentStrums.members[daNote.noteData].playCharAnim(useAltAnim);
-
-						dad.holdTimer = 0;
+						dadStrumAnim(daNote.noteData);
 					}
+
+					dad.holdTimer = 0;
 
 					if (SONG.needsVoices)
 						vocals.volume = 1;
@@ -2783,10 +2773,10 @@ class PlayState extends MusicBeatState
 		canPause = false;
 		FlxG.sound.music.volume = 0;
 		vocals.volume = 0;
-		if (SONG.validScore)
+		if (SONG.validScore && !usedPractice)
 		{
 			#if !switch
-			Highscore.saveScore(SONG.song, songScore, storyDifficulty);
+			Highscore.saveScore(SONG.song, songScore, diffText);
 			#end
 		}
 
@@ -2807,20 +2797,14 @@ class PlayState extends MusicBeatState
 
 				StoryMenuState.setUnlocked(weekName);
 
-				if (SONG.validScore) 
+				if (SONG.validScore && !usedPractice) 
 				{
-					Highscore.saveWeekScore(weekName, campaignScore, storyDifficulty);
+					Highscore.saveWeekScore(weekName, campaignScore, diffText);
 				}
 			}
 			else
 			{
-				var difficulty:String = "";
-
-				if (storyDifficulty == 0)
-					difficulty = '-easy';
-
-				if (storyDifficulty == 2)
-					difficulty = '-hard';
+				var difficulty:String = diffText;
 
 				trace('LOADING NEXT SONG');
 				trace(PlayState.storyPlaylist[0].toLowerCase() + difficulty);
@@ -3070,9 +3054,6 @@ class PlayState extends MusicBeatState
 
 				if (!daNote.isThreePlayerNote)
 				{
-					if (perfectMode)
-						noteCheck(true, daNote);
-
 					// Jump notes
 					if (possibleNotes.length >= 2)
 					{
@@ -3097,21 +3078,36 @@ class PlayState extends MusicBeatState
 						}
 						else if (possibleNotes[0].noteData == possibleNotes[1].noteData)
 						{
-							noteCheck(controlArray[daNote.noteData], daNote);
+							if (controlArray[daNote.noteData])
+									goodNoteHit(daNote);
 						}
 						else
 						{
 							for (coolNote in possibleNotes)
 							{
-								noteCheck(controlArray[coolNote.noteData], coolNote);
+								if (controlArray[coolNote.noteData])
+									goodNoteHit(coolNote);
 							}
 						}
 					}
 					else // regular notes?
 					{
-						noteCheck(controlArray[daNote.noteData], daNote);
+						if (controlArray[daNote.noteData])
+							goodNoteHit(daNote);
 					}
 				}
+			}
+			else if (!Main.gameSettings.getSettingBool('Ghost Tapping'))
+			{
+				if (left)
+					noteMiss(0, null);
+				if (down)
+					noteMiss(1, null);
+				if (up)
+					noteMiss(2, null);
+				if (right)
+					noteMiss(3, null);
+
 			}
 		}
 
@@ -3209,7 +3205,11 @@ class PlayState extends MusicBeatState
 
 	function noteMiss(direction:Int = 1, daNote:Note):Void
 	{
-		health -= daNote.healthLoss;
+		if (daNote == null)
+			health -= 0.05;
+		else
+			health -= daNote.healthLoss;
+
 		if (combo > 5 && gf.animOffsets.exists('sad'))
 		{
 			gf.playAnim('sad');
@@ -3256,12 +3256,15 @@ class PlayState extends MusicBeatState
 				noteMiss(note.noteData, note);
 
 				note.wasGoodHit = true;
+
 				if (!note.isSustainNote)
 				{
 					note.kill();
 					notes.remove(note, true);
 					note.destroy();
 				}
+
+				playerStrumAnim(note.noteData);
 
 				return;
 			}
@@ -3406,7 +3409,7 @@ class PlayState extends MusicBeatState
 
 		for (module in updateScript) {
 			if (module.isAlive && module.exists('onStepHit')) {
-				module.get('onStepHit')(curStep);
+				module.get('onStepHit')();
 			} else
 				updateScript.splice(updateScript.indexOf(module), 1);
 		}
@@ -3433,7 +3436,7 @@ class PlayState extends MusicBeatState
 
 		for (module in updateScript) {
 			if (module.isAlive && module.exists('onBeatHit')) {
-				module.get('onBeatHit')(curBeat);
+				module.get('onBeatHit')();
 				trace("Les Goooooo BEATHIT");
 			} else
 				updateScript.splice(updateScript.indexOf(module), 1);
@@ -3582,7 +3585,7 @@ class PlayState extends MusicBeatState
 
 	function dadStrumAnim(id:Int)
 	{
-		opponentStrums.members[id].animation.play('confirm');
+		opponentStrums.members[id].animation.play('confirm', true);
 	}
 
 	function playerStrumAnim(id:Int)
@@ -3592,7 +3595,7 @@ class PlayState extends MusicBeatState
 	
 	function gfStrumAnim(id:Int)
 	{
-		gfStrums.members[id].animation.play('confirm');
+		gfStrums.members[id].animation.play('confirm', true);
 	}
 
 	function playerStatic(id:Int)
@@ -3652,4 +3655,34 @@ class PlayState extends MusicBeatState
         splash.addSplash(x, y, noteData, threePlayer);
         splashGroup.add(splash);
     }
+
+	public static function getClassVar(className:String, variable:String)
+	{
+		var split:Array<String> = variable.split('.');
+
+		if(split.length > 1) {
+			var idk:Dynamic = Reflect.getProperty(Type.resolveClass(className), split[0]);
+			for (i in 1...split.length-1) {
+				idk = Reflect.getProperty(idk, split[i]);
+			}
+			return Reflect.getProperty(idk, split[split.length - 1]);
+		}
+
+		return Reflect.getProperty(Type.resolveClass(className), variable);
+	}
+
+	public static function setClassVar(className:String, variable:String, value:String)
+	{
+		var split:Array<String> = variable.split('.');
+		if (split.length > 1)
+		{
+			var idk:Dynamic = Reflect.getProperty(Type.resolveClass(className), split[0]);
+			for (i in 1...split.length - 1){
+				idk = Reflect.getProperty(idk, split[i]);
+			}
+			return Reflect.setProperty(idk, split[split.length - 1], value);
+		}
+
+		return Reflect.setProperty(Type.resolveClass(className), variable, value);
+	}
 }

@@ -15,12 +15,14 @@ class Strum extends FlxSprite
 	public var noteData:Int;
 	public var curX:Float;
 	public var curY:Float;
+	public var isPlayer:Bool = false;
 
 	override public function new(x:Float, y:Float, noteData:Int, isPlayer:Bool = false)
 	{
 		curX = x;
 		curY = y;
 		this.noteData = noteData;
+		this.isPlayer = isPlayer;
 
 		super(x, y);
 	}
@@ -44,5 +46,8 @@ class Strum extends FlxSprite
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
+
+		if (!isPlayer && animation.curAnim.name == 'confirm' && animation.curAnim.finished)
+			playAnim("static", true);
 	}
 }

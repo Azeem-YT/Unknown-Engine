@@ -13,19 +13,14 @@ class UnkownEngineHelpers
 
     public static function getCustomPath(file:String, type:AssetType, ?library:Null<String>, isMod:Bool = false)
     {
-        #if MODDING_ALLOWED
-        if (isMod)
-         return Paths.getModPath(file, type, library);
-        else
-        #end
-         return Paths.getPath(file, type, library);
+        return Paths.getPath(file, type, library);
     }
 
     public static function getShaderFile(type:String, file:String, isMod:Bool = false)
     {
         var daType:String = type.toLowerCase();
 
-        #if MODDING_ALLOWED
+        #if desktop
         if (isMod)
         {
             switch (daType)
@@ -67,9 +62,11 @@ class UnkownEngineHelpers
 
     public static function getCharJson(char:String)
     {
+        #if desktop
         if (FileSystem.exists('mods/characters/' + char + '.json'))
             return 'mods/characters/$char.json';
         else
+        #end
             return 'assets/characters/$char.json';
     }
 }

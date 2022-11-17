@@ -13,6 +13,11 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import lime.utils.Assets;
 
+#if desktop
+import sys.FileSystem;
+import sys.io.File;
+#end
+
 using StringTools;
 
 class FreeplayState extends MusicBeatState
@@ -32,6 +37,10 @@ class FreeplayState extends MusicBeatState
 	private var curPlaying:Bool = false;
 
 	private var iconArray:Array<HealthIcon> = [];
+
+	public static var diffArray:Array<String> = ['easy', 'normal', 'hard'];
+
+	public var diff:String = '';
 
 	override function create()
 	{
@@ -218,7 +227,7 @@ class FreeplayState extends MusicBeatState
 
 		if (accepted)
 		{
-			var poop:String = Highscore.formatSong(songs[curSelected].songName.toLowerCase(), curDifficulty);
+			var poop:String = Highscore.formatSong(songs[curSelected].songName.toLowerCase(), diff);
 
 			trace(poop);
 
@@ -237,23 +246,23 @@ class FreeplayState extends MusicBeatState
 		curDifficulty += change;
 
 		if (curDifficulty < 0)
-			curDifficulty = 2;
-		if (curDifficulty > 2)
+			curDifficulty = diffArray.length - 1;
+		if (curDifficulty >= diffArray.length)
 			curDifficulty = 0;
 
+		if (!diffArray[curDifficulty].contains('-'))
+			diff = '-' + diffArray[curDifficulty];
+		else
+			diff = '-' + diffArray[curDifficulty];
+
+		if (diff == '-normal')
+			diff = '';
+
 		#if !switch
-		intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);
+		intendedScore = Highscore.getScore(songs[curSelected].songName, diff);
 		#end
 
-		switch (curDifficulty)
-		{
-			case 0:
-				diffText.text = "EASY";
-			case 1:
-				diffText.text = 'NORMAL';
-			case 2:
-				diffText.text = "HARD";
-		}
+		diffText.text = diffArray[curDifficulty].toUpperCase();
 	}
 
 	function changeSelection(change:Int = 0)
@@ -267,10 +276,51 @@ class FreeplayState extends MusicBeatState
 		if (curSelected >= songs.length)
 			curSelected = 0;
 
+		diffArray = [];
+
+		#if desktop
+		var directorys:Array<String> = [Paths.getPreloadPath()];
+
+		for (dir in 0...directorys.length)
+		{
+			var songPath = directorys[dir] + 'data/' + songs[curSelected].songName + '/';
+
+			if (FileSystem.isDirectory(songPath))
+			{
+				for (file in FileSystem.readDirectory(songPath))
+				{
+					var path = haxe.io.Path.join([songPath, file]);
+					if (file.startsWith(songs[curSelected].songName.toLowerCase()) && file.endsWith('.json'))
+					{
+						var diffToAdd:String = '';
+
+						var songName:String = file;
+
+						songName = StringTools.replace(songName, songs[curSelected].songName, "");
+
+						songName = StringTools.replace(songName, '-', "");
+
+						if (songs[curSelected].songName.toLowerCase() == 'tutorial') //Tutorial is broken bruh
+							songName = StringTools.replace(songName, 'tutorial', "");
+
+						diffToAdd = StringTools.replace(songName, '.json' , "");
+
+						if (diffToAdd == '')
+							diffToAdd = 'normal';
+
+						if (!diffArray.contains(diffToAdd)) //for sum reason it likes to add song names too?
+							if (diffToAdd != songs[curSelected].songName.toLowerCase())
+								diffArray.push(diffToAdd);
+					}
+				}
+			}
+		}
+		#end
+
 		// selector.y = (70 * curSelected) + 30;
 
 		#if !switch
-		intendedScore = Highscore.getScore(songs[curSelected].songName, curDifficulty);
+		intendedScore = Highscore.getScore(songs[curSelected].songName, diff);
 		// lerpScore = 0;
 		#end
 
@@ -297,6 +347,8 @@ class FreeplayState extends MusicBeatState
 				// item.setGraphicSize(Std.int(item.width));
 			}
 		}
+
+		changeDiff();
 	}
 }
 

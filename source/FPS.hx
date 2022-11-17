@@ -19,6 +19,7 @@ class FPS extends TextField
 	private var times:Array<Float>;
 	private var memoryCount:Float;
 	private var maxMemory:Float;
+	private var versionText:String = 'Unknown-Engine Beta 1';
 
 	public function new(x:Float = 10, y:Float = 10, color:Int = 0x000000)
 	{
@@ -59,8 +60,11 @@ class FPS extends TextField
 		var currentCount = times.length;
 		currentFPS = Math.round((currentCount + cacheCount) / 2);
 
-		visible = true;
-		alpha = 1;
+		if (Main.gameSettings.getSettingBool('FPS Counter'))
+		{
+			visible = true;
+			alpha = 1;
+		}
 
 		if (currentCount != cacheCount)
 		{
@@ -68,7 +72,7 @@ class FPS extends TextField
 			if (maxMemory < memoryCount)
 				maxMemory = memoryCount;
 
-			text = "FPS: " + currentFPS + '\nMemory: ' + memoryCount + ' MB\nMax Memory: ' + maxMemory + ' MB';
+			text = "FPS: " + currentFPS + '\nMemory: ' + memoryCount + ' MB\nMax Memory: ' + maxMemory + ' MB' + '\n' + versionText;
 
 			textColor = 0xFFFFFFFF;
 

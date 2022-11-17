@@ -5,7 +5,7 @@ import haxe.Json;
 import haxe.format.JsonParser;
 import lime.utils.Assets;
 
-#if sys
+#if desktop
 import sys.io.File;
 import sys.FileSystem;
 #end
@@ -52,15 +52,15 @@ class Song
 	public static function loadFromJson(jsonInput:String, ?folder:String):SwagSong
 	{
 		var rawJson;
-
+		
+		#if desktop
 		if (FileSystem.exists(Paths.modJson('data/' + folder.toLowerCase() + '/' + jsonInput.toLowerCase())))
 		{
 			rawJson = File.getContent(Paths.modJson('data/' + folder.toLowerCase() + '/' + jsonInput.toLowerCase()));
 		}
 		else
-		{
+		#end
 			rawJson = Assets.getText(Paths.json('data/' + folder.toLowerCase() + '/' + jsonInput.toLowerCase())).trim();
-		}
 
 		while (!rawJson.endsWith("}"))
 		{

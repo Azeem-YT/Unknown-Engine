@@ -296,7 +296,7 @@ class ChartingState extends MusicBeatState
 
 		var directorys:Array<String> = [Paths.getPreloadPath()];
 
-		#if MODDING_ALLOWED
+		#if desktop
 		directorys.push(Paths.getModPreloadPath());
 		#end
 
@@ -462,7 +462,7 @@ class ChartingState extends MusicBeatState
 		
 		var directories:Array<String> = [Paths.getPreloadPath('modules/noteTypes')];
 
-		#if MODDING_ALLOWED
+		#if desktop
 		directories.push(Paths.mods('modules/noteTypes'));
 		#end
 

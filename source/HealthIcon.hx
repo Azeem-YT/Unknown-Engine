@@ -23,10 +23,11 @@ class HealthIcon extends FlxSprite
 
 	public function changeIcon(char:String, isPlayer:Bool = false)
 	{
-		if (FileSystem.exists(Paths.modImages("icons/icon-" + char)))
-			loadGraphic(Paths.modImages("icons/icon-" + char), true, 150, 150);
-		else if (FileSystem.exists(Paths.image("icons/icon-" + char)))
-			loadGraphic(Paths.image("icons/icon-" + char), true, 150, 150);
+		#if desktop
+		if (FileSystem.exists(Paths.modImages("icons/" + char)))
+			loadGraphic(Paths.modImages("icons/" + char), true, 150, 150);
+		else #end if (Assets.exists(Paths.image("icons/" + char)))
+			loadGraphic(Paths.image("icons/" + char), true, 150, 150);
 		else
 			loadGraphic(Paths.image("icons/icon-face"), true, 150, 150);
 			

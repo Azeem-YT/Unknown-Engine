@@ -29,6 +29,7 @@ typedef WeekJson =
 	var characters:Array<String>;
 	var startUnlocked:Bool;
 	var weekName:String;
+	var difficultys:Array<String>;
 	var weekImg:String;
 }
 
@@ -60,6 +61,15 @@ class StoryMenuState extends MusicBeatState
 		'week5',
 		'week6',
 		'week7'
+	];
+
+	var diffArray:Array<String> = [
+		'easy',
+		'normal',
+		'hard'
+	];
+
+	var fileDirs:Array<String> = [
 	];
 
 	public var jsonNames:Array<Dynamic> = [];
@@ -154,7 +164,7 @@ class StoryMenuState extends MusicBeatState
 
 		var directorys:Array<String> = [Paths.getPreloadPath()];
 
-		#if MODDING_ALLOWED
+		#if desktop
 		directorys.push(Paths.getModPreloadPath());
 		#end
 
@@ -183,6 +193,8 @@ class StoryMenuState extends MusicBeatState
 
 						if (jsonData != null)
 						{
+							fileDirs.push(dir + file);
+
 							if (jsonData.songs != null && jsonData.songs.length > 0)
 								weekData.push(jsonData.songs);
 							else
@@ -196,7 +208,7 @@ class StoryMenuState extends MusicBeatState
 							else
 							{
 								weekCharacters.push(['dad', 'bf', 'gf']);
-								Sys.println('Characters for json ' + jsonFile + 'is null');
+								Sys.println('Characters for json ' + jsonFile + ' is null');
 							}
 
 							if (jsonData.weekName != null)
@@ -403,13 +415,10 @@ class StoryMenuState extends MusicBeatState
 
 			var diffic = "";
 
-			switch (curDifficulty)
-			{
-				case 0:
-					diffic = '-easy';
-				case 2:
-					diffic = '-hard';
-			}
+			diffic = '-' + diffArray[curDifficulty];
+
+			if (diffic == '-normal')
+				diffic = '';
 
 			PlayState.storyDifficulty = curDifficulty;
 			PlayState.weekName = jsonNames[curWeek];
@@ -428,9 +437,23 @@ class StoryMenuState extends MusicBeatState
 	{
 		curDifficulty += change;
 
+		if (FileSystem.exists(fileDirs[curWeek]))
+		{
+			trace("Loading Diff for jsonFile " + jsonNames[curWeek]);
+			var jsonData:WeekJson = Json.parse(File.getContent(fileDirs[curWeek]));
+
+			if (jsonData != null)
+			{
+				if (jsonData.difficultys != null)
+					diffArray = jsonData.difficultys;
+				else
+					diffArray = ['easy', 'normal', 'hard'];
+			}
+		}
+
 		if (curDifficulty < 0)
-			curDifficulty = 2;
-		if (curDifficulty > 2)
+			curDifficulty = diffArray.length - 1;
+		if (curDifficulty >= diffArray.length)
 			curDifficulty = 0;
 
 		sprDifficulty.offset.x = 0;
@@ -438,13 +461,13 @@ class StoryMenuState extends MusicBeatState
 		switch (curDifficulty)
 		{
 			case 0:
-				sprDifficulty.animation.play('easy');
+				sprDifficulty.animation.play(diffArray[curDifficulty]);
 				sprDifficulty.offset.x = 20;
 			case 1:
-				sprDifficulty.animation.play('normal');
+				sprDifficulty.animation.play(diffArray[curDifficulty]);
 				sprDifficulty.offset.x = 70;
 			case 2:
-				sprDifficulty.animation.play('hard');
+				sprDifficulty.animation.play(diffArray[curDifficulty]);
 				sprDifficulty.offset.x = 20;
 		}
 
@@ -452,10 +475,10 @@ class StoryMenuState extends MusicBeatState
 
 		// USING THESE WEIRD VALUES SO THAT IT DOESNT FLOAT UP
 		sprDifficulty.y = leftArrow.y - 15;
-		intendedScore = Highscore.getWeekScore(curWeek, curDifficulty);
+		intendedScore = Highscore.getWeekScore(curWeek, diffArray[curDifficulty]);
 
 		#if !switch
-		intendedScore = Highscore.getWeekScore(curWeek, curDifficulty);
+		intendedScore = Highscore.getWeekScore(curWeek, diffArray[curDifficulty]);
 		#end
 
 		FlxTween.tween(sprDifficulty, {y: leftArrow.y + 15, alpha: 1}, 0.07);
@@ -534,7 +557,7 @@ class StoryMenuState extends MusicBeatState
 		txtTracklist.x -= FlxG.width * 0.35;
 
 		#if !switch
-		intendedScore = Highscore.getWeekScore(curWeek, curDifficulty);
+		intendedScore = Highscore.getWeekScore(curWeek, diffArray[curDifficulty]);
 		#end
 	}
 

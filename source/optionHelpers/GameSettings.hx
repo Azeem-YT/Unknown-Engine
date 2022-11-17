@@ -47,12 +47,6 @@ class GameSettings
 			FlxG.save.data.ghostTapping,
 			Checkmark,
 			'If Checked, Ghost Tapping allowing you to press inputs without missing.'
-		],
-		'Play Opponent Side' => [
-			'Play Opponent Side',
-			FlxG.save.data.opponentSide,
-			Checkmark,
-			"Play the opponent's side instead of the player's side!"
 		]
 	];
 
@@ -118,12 +112,6 @@ class GameSettings
 				FlxG.save.data.ghostTapping,
 				Checkmark,
 				'If Checked, Ghost Tapping allowing you to press inputs without missing.'
-			],
-			'Play Opponent Side' => [
-				'Play Opponent Side',
-				FlxG.save.data.opponentSide,
-				Checkmark,
-				"Play the opponent's side instead of the player's side!"
 			]
 		];
 
@@ -140,7 +128,7 @@ class GameSettings
 
 		var boolSetting:Array<Bool> = [];
 		
-		for (lel in stringSettings.keys())
+		for (lel in boolSettings.keys())
 		{
 			boolSetting.push(boolSettings.get(lel));
 		}

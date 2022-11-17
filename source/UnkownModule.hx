@@ -78,6 +78,8 @@ class ModuleHandler
 		vars.set("curStep", PlayState.instance.curStep);
 		vars.set("elapsed", PlayState.curElapsed);
 		vars.set("loadModule", loadModule);
+		vars.set("setClassVar", PlayState.setClassVar);
+		vars.set("getClassVar", PlayState.getClassVar);
 
 		if (shouldLoadModule)
 			loadModule(path);
@@ -143,11 +145,6 @@ class UnkownModule
 
 		for (i in ModuleHandler.vars.keys())
 			interp.variables.set(i, ModuleHandler.vars.get(i));
-
-		interp.variables.set("exit", exit);
-		interp.variables.set("exists", exists);
-		interp.variables.set("get", get);
-		interp.variables.set("set", set);
 
 		interp.execute(contents);
 

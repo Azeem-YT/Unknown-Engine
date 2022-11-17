@@ -699,6 +699,8 @@ class OptionPrefs extends MusicBeatState
 			case 'Ghost Tapping':
 				FlxG.save.data.ghostTapping = !optionsVars[curSelected];
 				trace("Chosen Ghost Tapping");
+			case 'Play Opponent Side':
+				FlxG.save.data.opponentSide = !optionsVars[curSelected];
 			default:
 				trace("Chosen Option doesn't exist");
 		}

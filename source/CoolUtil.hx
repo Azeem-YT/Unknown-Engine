@@ -2,7 +2,6 @@ package;
 
 import lime.utils.Assets;
 
-
 #if sys
 import sys.io.File;
 import sys.FileSystem;
@@ -21,7 +20,7 @@ class CoolUtil
 
 	public static function coolTextFile(path:String):Array<String>
 	{
-		#if sys
+		#if desktop
 		var daList:Array<String> = File.getContent(path).trim().split('\n');
 		#else
 		var daList:Array<String> = Assets.getText(path).trim().split('\n');

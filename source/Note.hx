@@ -15,7 +15,7 @@ import polymod.format.ParseRules.TargetSignatureElement;
 #end
 import lime.utils.Assets;
 import flixel.FlxG;
-#if sys
+#if desktop
 import sys.FileSystem;
 import sys.io.File;
 #end
@@ -138,7 +138,7 @@ class Note extends FlxSprite
 
 		var directorys:Array<String> = [Paths.getPreloadPath()];
 
-		#if MODDING_ALLOWED
+		#if desktop
 		directorys.push(Paths.getModPreloadPath());
 		#end
 

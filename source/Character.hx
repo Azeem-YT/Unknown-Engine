@@ -8,7 +8,7 @@ import flixel.tweens.FlxTween;
 import flixel.util.FlxSort;
 import flixel.graphics.frames.FlxFrame;
 import Section.SwagSection;
-#if MODDING_ALLOWED
+#if desktop
 import sys.io.File;
 import sys.FileSystem;
 #end
@@ -24,6 +24,8 @@ typedef CharData =
 	var framesPath:String;
 	var flipX:Bool;
 	var camOffset:Array<Float>;
+	var scale:Float;
+	var healthIcon:String;
 	var animations:Array<AnimData>;
 }
 
@@ -56,7 +58,7 @@ class Character extends FlxSprite
 	public var camOffset:Array<Float> = [0,0];
 	public var animationNotes:Array<Dynamic> = [];
 
-	public var healthIcon:String = 'face';
+	public var healthIcon:String;
 
 	public static var default_character:String = 'bf';
 
@@ -549,6 +551,8 @@ class Character extends FlxSprite
 				addOffset('singLEFTmiss', 12, 7);
 				addOffset('singDOWNmiss', -10, -10);
 				addOffset('bfCatch', 0, 0);
+
+				healthIcon = 'bf';
 				
 				playAnim("idle");
 
@@ -567,7 +571,7 @@ class Character extends FlxSprite
 
 				var usingMod:Bool = false;
 
-				#if MODDING_ALLOWED
+				#if desktop
 				if (FileSystem.exists(Paths.modImages(data.framesPath)) && FileSystem.exists(Paths.modXml(data.framesPath)))
 				{
 					frames = Paths.getModSparrowAtlas(data.framesPath);
@@ -581,6 +585,11 @@ class Character extends FlxSprite
 				}
 
 				camOffset = data.camOffset;
+				
+				if (data.healthIcon != null && data.healthIcon != '')
+					healthIcon = data.healthIcon
+				else
+					healthIcon = 'face';
 
 				if (frames != null)
 				{
@@ -604,6 +613,9 @@ class Character extends FlxSprite
 							}
 						}
 					}
+
+					if (data.scale > 1 && data.scale < 1)
+						setGraphicSize(Std.int(width * data.scale));
 				}
 				else
 				{
@@ -647,6 +659,9 @@ class Character extends FlxSprite
 					flipX = true;
 				}
 		}
+
+		if (healthIcon == null)
+			healthIcon = 'icon-' + curCharacter;
 
 		getIdle();
 		dance();

@@ -6,7 +6,7 @@ import openfl.utils.AssetType;
 import openfl.utils.Assets as OpenFlAssets;
 import lime.utils.Assets;
 import flixel.FlxSprite;
-#if MODDING_ALLOWED
+#if desktop
 import sys.io.File;
 import sys.FileSystem;
 import flixel.graphics.FlxGraphic;
@@ -20,6 +20,8 @@ using StringTools;
 class Paths
 {
 	inline public static var SOUND_EXT = #if web "mp3" #else "ogg" #end;
+	public static var modInst:Map<String, Sound> = new Map<String, Sound>();
+	public static var modVoices:Map<String, Sound> = new Map<String, Sound>();
 
 	static var currentLevel:String;
 
@@ -105,14 +107,46 @@ class Paths
 		return getPath('music/$key.$SOUND_EXT', MUSIC, library);
 	}
 
-	inline static public function voices(song:String)
+	inline static public function voices(song:String):Any
 	{
+		#if desktop
+		var songFile:Sound = null;
+
+		if (FileSystem.exists(modvoices(song)))
+		{
+			if (!modInst.exists(song))
+				modInst.set(song, Sound.fromFile(modvoices(song)));
+
+			songFile = modInst.get(song);
+		}
+
+		if (songFile != null)
+			return songFile;
+		#end
+
 		return 'songs:assets/songs/${song.toLowerCase()}/Voices.$SOUND_EXT';
 	}
 
-	inline static public function inst(song:String)
+	inline static public function inst(song:String):Any
 	{
-		return 'songs:assets/songs/${song.toLowerCase()}/Inst.$SOUND_EXT';
+		song = song.toLowerCase();
+
+		#if desktop
+		var songFile:Sound = null;
+
+		if (FileSystem.exists(modinst(song)))
+		{
+			if (!modInst.exists(song))
+				modInst.set(song, Sound.fromFile(modinst(song)));
+
+			songFile = modInst.get(song);
+		}
+
+		if (songFile != null)
+			return songFile;
+		#end
+
+		return 'songs:assets/songs/$song/Inst.$SOUND_EXT';
 	}
 
 	inline static public function image(key:String, ?library:String)
@@ -150,29 +184,17 @@ class Paths
 		return FlxAtlasFrames.fromSpriteSheetPacker(image(key, library), file('images/$key.txt', library));
 	}
 
-	#if MODDING_ALLOWED
-	inline static public function mods(key:String = '')
+	inline static public function getSongPath(song:String)
+	{
+		song = song.toLowerCase();
+
+		return 'assets/data/$song/';
+	}
+
+	#if desktop
+	inline static public function mods(key:String = '') //getModPath was so useless. It prevented the images and other stuff to be loaded
 	{
 		return 'mods/' + key;
-	}
-	
-	public static function getModPath(file:String, type:AssetType, ?library:Null<String>)
-	{
-		if (library != null)
-			return getModLibraryPath(file, library);
-
-		if (currentLevel != null)
-		{
-			var levelPath = getModLibraryPathForce(file, currentLevel);
-			if (OpenFlAssets.exists(levelPath, type))
-				return levelPath;
-
-			levelPath = getModLibraryPathForce(file, "shared");
-			if (OpenFlAssets.exists(levelPath, type))
-				return levelPath;
-		}
-
-		return getModPreloadPath(file);
 	}
 	
 	public inline static function getModPreloadPath(?file:String)
@@ -183,11 +205,6 @@ class Paths
 			return 'mods/';
 	}
 
-	public static function getModLibraryPath(file:String, library = "preload")
-	{
-		return if (library == "preload" || library == "default") getModPreloadPath(file); else getModLibraryPathForce(file, library);
-	}
-
 	inline static function getModLibraryPathForce(file:String, library:String)
 	{
 		return '$library:mods/$library/$file';
@@ -195,45 +212,45 @@ class Paths
 
 	inline static public function stageLua(file:String, ?library)
 	{
-		return getModPath('stages/$file.lua', TEXT, library);
+		return mods('stages/$file.lua');
 	}
 
 	inline static public function modJson(key:String = '', ?library:String) 
 	{
-		return getModPath('$key.json', TEXT, library);
+		return mods('$key.json');
 	}
 
 	inline static public function modMusic(key:String = '', ?library:String)
 	{
-		return getModPath('music/$key.$SOUND_EXT', MUSIC, library);
+		return mods('music/$key.$SOUND_EXT');
 	}
 
 	inline static public function modSounds(key:String = '', ?library:String)
 	{
-		return getModPath('sounds/$key.$SOUND_EXT', SOUND, library);
+		return mods('sounds/$key.$SOUND_EXT');
 	}
 	inline static public function modImages(key:String = '', ?library:String)
 	{
-		return getModPath('images/$key.png', IMAGE, library);
+		return mods('images/$key.png');
 	}
 	inline static public function modXml(key:String = '', ?library:String)
 	{
-		return getModPath('data/$key.xml', TEXT, library);
+		return mods('$key.xml');
 	}
 	inline static public function modTxt(key:String = '', ?library:String)
 	{
-		return getModPath('data/$key.txt', TEXT, library);
+		return mods('$key.txt');
 	}
 	inline static public function modvoices(song:String)
 	{
 		var songLowerCase:String = song.toLowerCase();
-		return 'mods/songs/$songLowerCase/Voices.$SOUND_EXT';
+		return 'mods/songs/' + songLowerCase + '/Voices.$SOUND_EXT';
 	}
 
 	inline static public function modinst(song:String)
 	{
 		var songLowerCase:String = song.toLowerCase();
-		return 'mods/songs/$songLowerCase/Inst.$SOUND_EXT';
+		return 'mods/songs/' + songLowerCase + 'Inst.$SOUND_EXT';
 	}
 
 	inline static public function getModSparrowAtlas(key:String)
