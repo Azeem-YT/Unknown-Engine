@@ -572,11 +572,9 @@ class Character extends FlxSprite
 				var usingMod:Bool = false;
 
 				#if desktop
-				if (FileSystem.exists(Paths.modImages(data.framesPath)) && FileSystem.exists(Paths.modXml(data.framesPath)))
-				{
-					frames = Paths.getModSparrowAtlas(data.framesPath);
+				frames = Paths.getModSparrowAtlas(data.framesPath);
+				if (frames != null)
 					usingMod = true;
-				}
 				#end
 
 				if (!usingMod)
@@ -587,9 +585,9 @@ class Character extends FlxSprite
 				camOffset = data.camOffset;
 				
 				if (data.healthIcon != null && data.healthIcon != '')
-					healthIcon = data.healthIcon
+					healthIcon = data.healthIcon;
 				else
-					healthIcon = 'face';
+					healthIcon = 'icon-face';
 
 				if (frames != null)
 				{
