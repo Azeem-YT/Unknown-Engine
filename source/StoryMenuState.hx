@@ -42,7 +42,7 @@ class StoryMenuState extends MusicBeatState
 	var weekCharacters:Array<Dynamic> = [];
 
 	var weekNames:Array<String> = [
-		"Learn How To Play",
+		"",
 		"Daddy Dearest",
 		"Spooky Month",
 		"PICO",
@@ -97,6 +97,8 @@ class StoryMenuState extends MusicBeatState
 	var currentChars:Array<String> = [];
 	var weekChars:Array<String> = [];
 	var defaultChars:Array<String> = ["dad", "bf", "gf"];
+
+	var curWeekName:String = '';
 
 	public static var instance:StoryMenuState;
 
@@ -437,17 +439,19 @@ class StoryMenuState extends MusicBeatState
 	{
 		curDifficulty += change;
 
-		if (FileSystem.exists(fileDirs[curWeek]))
+		if (curWeekName != jsonNames[curWeek])
 		{
-			trace("Loading Diff for jsonFile " + jsonNames[curWeek]);
-			var jsonData:WeekJson = Json.parse(File.getContent(fileDirs[curWeek]));
-
-			if (jsonData != null)
+			if (FileSystem.exists(fileDirs[curWeek]))
 			{
-				if (jsonData.difficultys != null)
-					diffArray = jsonData.difficultys;
-				else
-					diffArray = ['easy', 'normal', 'hard'];
+				var jsonData:WeekJson = Json.parse(File.getContent(fileDirs[curWeek]));
+
+				if (jsonData != null)
+				{
+					if (jsonData.difficultys != null)
+						diffArray = jsonData.difficultys;
+					else
+						diffArray = ['easy', 'normal', 'hard'];
+				}
 			}
 		}
 
@@ -495,6 +499,8 @@ class StoryMenuState extends MusicBeatState
 			curWeek = 0;
 		if (curWeek < 0)
 			curWeek = weekData.length - 1;
+
+		curWeekName = jsonNames[curWeek];
 
 		var bullShit:Int = 0;
 

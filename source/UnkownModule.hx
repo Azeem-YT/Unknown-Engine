@@ -30,17 +30,17 @@ class ModuleHandler
 {
 	public static var parser:Parser;
 	public static var vars:StringMap<Dynamic>;
-	var fileToExecute:Expr;
 
-	var shaderFragType:Array<String> = ["frag", "fragment"];
-	var shaderVergType:Array<String> = ["verg", "vertex"];
+	public function new()
+	{
+	
+	}
 
-	public var shaderHudCount:Array<BitmapFilter> = [];
-	public var shaderGameCount:Array<BitmapFilter> = [];
-
-	public function new(?shouldLoadModule:Bool = false, ?path:String)
+	public function setVars()
 	{
 		parser = new Parser();
+
+		parser.allowTypes = true;
 
 		vars = new StringMap<Dynamic>();
 
@@ -50,7 +50,7 @@ class ModuleHandler
 		vars.set("Conductor", Conductor);
 		vars.set("MusicBeatState", MusicBeatState);
 		vars.set("PlayState", PlayState);
-		vars.set("Notes", Note);
+		vars.set("Note", Note);
 		vars.set("Paths", Paths);
 		vars.set("Character", Character);
 		vars.set("Boyfriend", Boyfriend);
@@ -59,13 +59,15 @@ class ModuleHandler
 		vars.set("FlxTimer", FlxTimer);
 		vars.set("FlxTween", FlxTween);
 		vars.set("FlxEase", FlxEase);
+		vars.set("FlxSprite", FlxSprite);
+		vars.set("TankBGSprite", TankBGSprite);
 		vars.set("Bool", Bool);
 		vars.set("String", String);
 		vars.set("Float", Float);
 		vars.set("Int", Int);
+		vars.set("Array", Array);
 		vars.set("ShaderFilter", ShaderFilter);
 		vars.set("FlxGraphicShader", FlxGraphicsShader);
-		vars.set("setShaderCam", setShaderFilterToCam);
 		vars.set("Control-LEFT", PlayState.instance.controls.LEFT);
 		vars.set("Control-DOWN", PlayState.instance.controls.DOWN);
 		vars.set("Control-UP", PlayState.instance.controls.UP);
@@ -80,46 +82,12 @@ class ModuleHandler
 		vars.set("loadModule", loadModule);
 		vars.set("setClassVar", PlayState.setClassVar);
 		vars.set("getClassVar", PlayState.getClassVar);
-
-		if (shouldLoadModule)
-			loadModule(path);
-	}
-
-	public function setShaderFilterToCam(cam:String, fileType:String, shaderName:String, isMod:Bool = false)
-	{
-		cam = cam.toLowerCase();
-
-		if (shaderFragType.contains(fileType))
-		{
-			trace('File Type: FRAG');
-
-			var shader:ShaderFilter = new ShaderFilter(new GraphicsShader("", UnkownEngineHelpers.getShaderFile("frag", shaderName, isMod)));
-			switch (cam)
-			{
-				case 'hud' | 'camhud':
-					trace("Attempting to add Shader to camHUD...");
-					PlayState.instance.camHUD.setFilters([shader]);
-				case 'game' | 'camgame':
-					trace("Attempting to add Shader to camGame...");
-					PlayState.instance.camGame.setFilters([shader]);
-			}
-		}
-
-		if (shaderVergType.contains(fileType))
-		{
-			trace("File Type: VERG");
-
-			var shader:ShaderFilter = new ShaderFilter(new GraphicsShader(UnkownEngineHelpers.getShaderFile("verg", shaderName, isMod), ""));
-			switch (cam)
-			{
-				case 'hud' | 'camhud':
-					trace("Attempting to add Shader to camHUD...");
-					PlayState.instance.camHUD.setFilters([shader]);
-				case 'game' | 'camgame':
-					trace("Attempting to add Shader to camGame...");
-					PlayState.instance.camGame.setFilters([shader]);
-			}
-		}
+		vars.set("playSound", FlxG.sound.play);
+		vars.set("add", PlayState.instance.add);
+		vars.set("remove", PlayState.instance.remove);
+		vars.set("boyfriend", PlayState.boyfriend);
+		vars.set("dad", PlayState.dad);
+		vars.set("gf", PlayState.gf);
 	}
 
 	public function loadModule(path:String, ?params:StringMap<Dynamic>)
@@ -146,9 +114,12 @@ class UnkownModule
 		for (i in ModuleHandler.vars.keys())
 			interp.variables.set(i, ModuleHandler.vars.get(i));
 
-		interp.execute(contents);
+		interp.variables.set("exit", exit);
+		interp.variables.set("exists", exists);
+		interp.variables.set("get", get);
+		interp.variables.set("set", set);
 
-		PlayState.updateScript.push(this);
+		interp.execute(contents);
 	}
 
 	public function exit():Dynamic

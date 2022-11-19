@@ -120,6 +120,18 @@ class ChartingState extends MusicBeatState
 		'gf-tankmen'
 	];
 
+	public var stageList:Array<String> = [
+		'stage',
+		'halloween',
+		'philly',
+		'limo',
+		'mall',
+		'mallEvil',
+		'school',
+		'schoolEvil',
+		'tank'
+	];
+
 	public var currentTypeSelected:String = 'none';
 
 	override function create()
@@ -293,11 +305,12 @@ class ChartingState extends MusicBeatState
 		var noteTexVer:Array<String> = CoolUtil.coolTextFile(Paths.txt('data/noteTexList'));
 
 		var allChars:Array<String> = characterList;
+		var totalStages:Array<String> = stageList;
 
 		var directorys:Array<String> = [Paths.getPreloadPath()];
 
 		#if desktop
-		directorys.push(Paths.getModPreloadPath());
+		directorys.push(Paths.mods());
 		#end
 
 		for (i in 0...directorys.length)
@@ -319,6 +332,28 @@ class ChartingState extends MusicBeatState
 				}
 			}
 		}
+
+		for (i in 0...directorys.length)
+		{
+			var dirPath:String = directorys[1] + 'stages';
+
+			if (FileSystem.isDirectory(dirPath))
+			{
+				for (file in FileSystem.readDirectory(dirPath))
+				{
+					var path = haxe.io.Path.join([dirPath, file]);
+					if (file.endsWith('.hxs'))
+					{
+						var fileToPush:String = StringTools.replace(file, ".hxs", "");
+
+						if (!totalStages.contains(fileToPush))
+							totalStages.push(fileToPush);
+					}
+				}
+			}
+		}
+
+		stageList = totalStages;
 
 		var player1DropDown = new FlxUIDropDownMenu(10, 100, FlxUIDropDownMenu.makeStrIdLabelArray(allChars, true), function(character:String)
 		{
@@ -354,6 +389,13 @@ class ChartingState extends MusicBeatState
 		});
 
 		noteOpponentTexDropDown.selectedLabel = _song.noteOpponentTexture;
+		
+		var stageDropDown = new FlxUIDropDownMenu(140, 250, FlxUIDropDownMenu.makeStrIdLabelArray(stageList, true), function(stage:String)
+		{
+			_song.stage = stageList[Std.parseInt(stage)];
+		});
+
+		stageDropDown.selectedLabel = _song.stage;
 
 		var tab_group_song = new FlxUI(null, UI_box);
 		tab_group_song.name = "Song";
@@ -375,6 +417,7 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(gfVersionDropDown);
 		tab_group_song.add(playerNoteTexDropDown);
 		tab_group_song.add(noteOpponentTexDropDown);
+		tab_group_song.add(stageDropDown);
 
 		UI_box.addGroup(tab_group_song);
 		UI_box.scrollFactor.set();

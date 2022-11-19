@@ -278,8 +278,11 @@ class FreeplayState extends MusicBeatState
 
 		diffArray = [];
 
-		#if desktop
 		var directorys:Array<String> = [Paths.getPreloadPath()];
+
+		#if desktop
+		directorys.push(Paths.mods());
+		#end
 
 		for (dir in 0...directorys.length)
 		{
@@ -315,7 +318,6 @@ class FreeplayState extends MusicBeatState
 				}
 			}
 		}
-		#end
 
 		// selector.y = (70 * curSelected) + 30;
 

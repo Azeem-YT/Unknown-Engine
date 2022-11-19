@@ -166,12 +166,22 @@ class Paths
 
 	inline static public function video(key:String)
 	{
-		return 'assets/videos/$key';
+		#if desktop
+		if (FileSystem.exists(mods('videos/' + key)))
+			return mods('videos/' + key);
+		else
+		#end
+			return 'assets/videos/$key';
 	}
 
 	inline static public function font(key:String)
 	{
-		return 'assets/fonts/$key';
+		#if desktop
+		if (FileSystem.exists(modFonts(key)))
+			return modFonts(key);
+		else
+		#end
+			return 'assets/fonts/$key';
 	}
 
 	inline static public function getSparrowAtlas(key:String, ?library:String)
@@ -192,12 +202,19 @@ class Paths
 	}
 
 	#if desktop
+
+	public static var graphicIsLoaded:Map<String, Bool> = new Map<String, Bool>();
+	public static var loadedSounds:Map<String, Sound> = new Map<String, Sound>();
+
 	inline static public function mods(key:String = '') //getModPath was so useless. It prevented the images and other stuff to be loaded
 	{
-		return 'mods/' + key;
+		if (key != '' && key != null)
+			return 'mods/$key';
+		else
+			return 'mods/';
 	}
 	
-	public inline static function getModPreloadPath(?file:String)
+	public inline static function getModPreloadPath(?file:String) //Kept this here bc i didnt want to edit all the getModPreloadPaths
 	{
 		if (file != '' && file != null)
 			return 'mods/$file';
@@ -205,39 +222,34 @@ class Paths
 			return 'mods/';
 	}
 
-	inline static function getModLibraryPathForce(file:String, library:String)
-	{
-		return '$library:mods/$library/$file';
-	}
-
-	inline static public function stageLua(file:String, ?library)
+	inline static public function stageLua(file:String)
 	{
 		return mods('stages/$file.lua');
 	}
 
-	inline static public function modJson(key:String = '', ?library:String) 
+	inline static public function modJson(key:String = '') 
 	{
 		return mods('$key.json');
 	}
 
-	inline static public function modMusic(key:String = '', ?library:String)
+	inline static public function modMusic(key:String = '')
 	{
 		return mods('music/$key.$SOUND_EXT');
 	}
 
-	inline static public function modSounds(key:String = '', ?library:String)
+	inline static public function modSounds(key:String = '')
 	{
 		return mods('sounds/$key.$SOUND_EXT');
 	}
-	inline static public function modImages(key:String = '', ?library:String)
+	inline static public function modImages(key:String = '')
 	{
 		return mods('images/$key.png');
 	}
-	inline static public function modXml(key:String = '', ?library:String)
+	inline static public function modXml(key:String = '')
 	{
 		return mods('$key.xml');
 	}
-	inline static public function modTxt(key:String = '', ?library:String)
+	inline static public function modTxt(key:String = '')
 	{
 		return mods('$key.txt');
 	}
@@ -250,17 +262,83 @@ class Paths
 	inline static public function modinst(song:String)
 	{
 		var songLowerCase:String = song.toLowerCase();
-		return 'mods/songs/' + songLowerCase + 'Inst.$SOUND_EXT';
+		return 'mods/songs/' + songLowerCase + '/Inst.$SOUND_EXT';
+	}
+
+	inline static public function modFonts(key:String)
+		return mods('fonts/$key');
+
+	inline static function getFileContent(file:String)
+	{
+		if (FileSystem.exists(mods(file)))
+			return File.getContent(mods(file));
+		else
+			return null;
+	}
+
+	inline static public function loadSound(key:String):Any
+	{
+		var soundFile:Sound = null;
+
+		if (FileSystem.exists(modSounds(key)))
+		{
+			if (!loadedSounds.exists(key))
+				loadedSounds.set(key, Sound.fromFile(modSounds(key)));
+
+			soundFile = loadedSounds.get(key);
+		}
+
+		if (soundFile != null)
+			return soundFile;
+		else
+			return '';
+	}
+
+	inline static public function getImage(key:String):FlxGraphic
+	{
+		if (FileSystem.exists(modImages(key)))
+		{
+			if (!graphicIsLoaded.exists(key))
+			{
+				var bitmap:BitmapData = BitmapData.fromFile(modImages(key));
+				var graphic:FlxGraphic = FlxGraphic.fromBitmapData(bitmap, false, key);
+				graphic.persist = true; //Game crashes if I dont do this.
+				FlxG.bitmap.addGraphic(graphic);
+				graphicIsLoaded.set(key, true);
+			}
+
+			return FlxG.bitmap.get(key);
+		}
+
+		return null;
+	}
+
+	inline static public function removeLoadedImages()
+	{
+		for (image in graphicIsLoaded.keys())
+		{
+			var graphic:FlxGraphic = FlxG.bitmap.get(image);
+			if (graphic != null)
+			{
+				FlxG.bitmap.removeByKey(image);
+				graphic.bitmap.dispose();
+				graphic.destroy();
+			}
+		}
+
+		graphicIsLoaded.clear();
 	}
 
 	inline static public function getModSparrowAtlas(key:String)
 	{
-		return FlxAtlasFrames.fromSparrow(modImages(key), file('images/$key.xml'));
+		var graphic:FlxGraphic = getImage(key);
+
+		return FlxAtlasFrames.fromSparrow(graphic, getFileContent('images/$key.xml'));
 	}
 
-	inline static public function getModPackerAtlas(key:String, ?library:String)
+	inline static public function getModPackerAtlas(key:String)
 	{
-		return FlxAtlasFrames.fromSpriteSheetPacker(modImages(key, library), file('images/$key.txt', library));
+		return FlxAtlasFrames.fromSpriteSheetPacker(getImage(key), getFileContent('images/$key.txt'));
 	}
 	#end
 }

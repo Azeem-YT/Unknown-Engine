@@ -229,19 +229,14 @@ class Note extends FlxSprite
 
 	function callNote(skinPath:String)
 	{
-		var daRealPath:String = "notRealPath";
-
-		if (FileSystem.exists(Paths.modImages(skinPath)) && FileSystem.exists(Paths.modXml(skinPath)))
-		{
-			frames = Paths.getModSparrowAtlas(skinPath);
-			loadAnimations();
-		}
-		else if (Assets.exists(Paths.image(skinPath)) && Assets.exists(Paths.xml(skinPath)))
-		{
+		frames = Paths.getModSparrowAtlas(skinPath);
+		
+		if (frames == null)
 			frames = Paths.getSparrowAtlas(skinPath);
-			loadAnimations();
-		}
-		else
+			
+		loadAnimations();
+
+		if (frames == null) //if frames are still null then just load default note.
 			loadDefaultNote();
 	}
 
@@ -501,6 +496,7 @@ class Note extends FlxSprite
 		vars.set("setYOffset", setYOffset);
 		vars.set("setHitCauseMiss", setHitCauseMiss);
 		vars.set("debugTrace", debugTrace);
+		vars.set("playSound", FlxG.sound.play);
 	}
 
 	public function debugTrace(text:String = "")

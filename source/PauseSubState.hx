@@ -17,8 +17,9 @@ class PauseSubState extends MusicBeatSubstate
 {
 	var grpMenuShit:FlxTypedGroup<Alphabet>;
 
-	var menuItems:Array<String> = ['Resume', 'Restart Song', 'Exit to menu'];
+	var menuItems:Array<String> = ['Resume', 'Restart Song', 'Practice Mode', 'Exit to menu'];
 	var curSelected:Int = 0;
+	var practiceText:FlxText;
 
 	var pauseMusic:FlxSound;
 
@@ -45,11 +46,18 @@ class PauseSubState extends MusicBeatSubstate
 		add(levelInfo);
 
 		var levelDifficulty:FlxText = new FlxText(20, 15 + 32, 0, "", 32);
-		levelDifficulty.text += CoolUtil.difficultyString();
+		levelDifficulty.text += PlayState.instance.diffArray[PlayState.storyDifficulty].toUpperCase();
 		levelDifficulty.scrollFactor.set();
 		levelDifficulty.setFormat(Paths.font('vcr.ttf'), 32);
 		levelDifficulty.updateHitbox();
 		add(levelDifficulty);
+
+		practiceText = new FlxText(20, levelDifficulty.y + 32, 0, "", 32);
+		practiceText.text += "PRACTICE MODE";
+		practiceText.scrollFactor.set();
+		practiceText.setFormat(Paths.font('vcr.ttf'), 32);
+		practiceText.updateHitbox();
+		add(practiceText);
 
 		levelDifficulty.alpha = 0;
 		levelInfo.alpha = 0;
@@ -60,6 +68,7 @@ class PauseSubState extends MusicBeatSubstate
 		FlxTween.tween(bg, {alpha: 0.6}, 0.4, {ease: FlxEase.quartInOut});
 		FlxTween.tween(levelInfo, {alpha: 1, y: 20}, 0.4, {ease: FlxEase.quartInOut, startDelay: 0.3});
 		FlxTween.tween(levelDifficulty, {alpha: 1, y: levelDifficulty.y + 5}, 0.4, {ease: FlxEase.quartInOut, startDelay: 0.5});
+		FlxTween.tween(practiceText, {alpha: 1, y: practiceText.y + 10}, 0.4, {ease: FlxEase.quartInOut, startDelay: 0.8});
 
 		grpMenuShit = new FlxTypedGroup<Alphabet>();
 		add(grpMenuShit);
@@ -107,6 +116,9 @@ class PauseSubState extends MusicBeatSubstate
 					close();
 				case "Restart Song":
 					FlxG.resetState();
+				case "Practice Mode":
+					PlayState.usingPractice = !PlayState.usingPractice;
+					practiceText.visible = PlayState.usingPractice;
 				case "Exit to menu":
 					FlxG.switchState(new MainMenuState());
 			}

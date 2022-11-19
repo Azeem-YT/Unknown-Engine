@@ -37,8 +37,6 @@ class Main extends Sprite
 	{
 		super();
 
-		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, gameCrashed);
-
 		if (stage != null)
 		{
 			init();
@@ -111,36 +109,5 @@ class Main extends Sprite
 	public static function setFPSVisible()
 	{
 		framerateCounter.visible = FlxG.save.data.fpsCounter;
-	}
-
-	public function gameCrashed(errorMsg:UncaughtErrorEvent)
-	{
-		var error:String = "";
-		var crashPath:String;
-		var stack:Array<StackItem> = CallStack.exceptionStack(true);
-		var curDate:String = Date.now().toString();
-
-		curDate = StringTools.replace(curDate, " ", "_");
-		curDate = StringTools.replace(curDate, ":", "'");
-
-		crashPath = "crashs/UE_Crash" + curDate + ".txt";
-
-		if (!FileSystem.exists("crashs/"))
-			FileSystem.createDirectory("crashs/");
-
-		for (crashStack in stack)
-		{
-			switch (crashStack)
-			{
-				case FilePos(s, file, line, column):
-					error += file + " (line " + line + ")\n";
-				default:
-					Sys.println(crashStack);
-			}
-		}
-
-		File.saveContent(crashPath, error + "\n");
-
-		Sys.exit(1);
 	}
 }

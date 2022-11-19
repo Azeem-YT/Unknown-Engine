@@ -15,7 +15,11 @@ class TankBGSprite extends FlxSprite
 
 		if (anims != null)
 		{
-			frames = Paths.getSparrowAtlas(image);
+			if (PlayState.instance.libraryToUse != null)
+				frames = Paths.getSparrowAtlas(image, PlayState.instance.libraryToUse);
+			else
+				frames = Paths.getSparrowAtlas(image);
+
 			for (i in 0...anims.length) {
 				animation.addByPrefix(anims[i], anims[i], 24, loop);
 

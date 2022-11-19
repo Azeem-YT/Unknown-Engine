@@ -210,7 +210,16 @@ class LuaScript
 		Lua_helper.add_callback(lua, "setTimeForward", function(seconds:Int) {
 			seconds = seconds * 1000;
 			PlayState.instance.setSongTime(Conductor.songPosition + seconds);
-			PlayState.instance.clearNotes(Conductor.songPosition);
+		});
+
+		Lua_helper.add_callback(lua, "setTimeBackwards", function(seconds:Int) {
+			seconds = seconds * 1000;
+			PlayState.instance.setSongTime(Conductor.songPosition - seconds);
+		});
+		
+		Lua_helper.add_callback(lua, "setSongTime", function(seconds:Int) {
+			seconds = seconds * 1000;
+			PlayState.instance.setSongTime(seconds);
 		});
 
 		Lua_helper.add_callback(lua," changeOpponentChar", function(newChar:String) {
