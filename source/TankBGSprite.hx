@@ -2,6 +2,10 @@ package;
 
 import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
+#if desktop
+import sys.FileSystem;
+import sys.io.File;
+#end
 
 using StringTools;
 
@@ -15,10 +19,23 @@ class TankBGSprite extends FlxSprite
 
 		if (anims != null)
 		{
+			#if desktop
+			frames = Paths.getModSparrowAtlas(image);
+
+			if (frames == null) 
+			{
+				if (PlayState.instance.libraryToUse != null)
+					frames = Paths.getSparrowAtlas(image, PlayState.instance.libraryToUse);
+				else
+					frames = Paths.getSparrowAtlas(image);
+			}
+			#else
 			if (PlayState.instance.libraryToUse != null)
 				frames = Paths.getSparrowAtlas(image, PlayState.instance.libraryToUse);
 			else
 				frames = Paths.getSparrowAtlas(image);
+			#end
+
 
 			for (i in 0...anims.length) {
 				animation.addByPrefix(anims[i], anims[i], 24, loop);
@@ -33,7 +50,15 @@ class TankBGSprite extends FlxSprite
 		else
 		{
 			if (image != null && image != '')
-				loadGraphic(Paths.image(image));
+			{
+				#if desktop
+				if (FileSystem.exists(Paths.modImages(image)))
+					loadGraphic(Paths.getImage(image));
+				else
+				#end
+					loadGraphic(Paths.image(image));
+			}
+
 			active = false;
 		}
 

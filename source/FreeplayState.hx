@@ -44,12 +44,22 @@ class FreeplayState extends MusicBeatState
 
 	override function create()
 	{
-		var initSonglist = CoolUtil.coolTextFile(Paths.txt('data/freeplaySonglist'));
+		var directorys:Array<String> = [Paths.getPreloadPath()];
 
-		for (i in 0...initSonglist.length)
+		#if desktop
+		directorys.push(Paths.mods());
+		#end
+
+
+		for (i in 0...directorys.length)
 		{
-			var stuff:Array<String> = initSonglist[i].split(',');
-			songs.push(new SongMetadata(stuff[0], Std.parseInt(stuff[1]), stuff[2]));
+			var initSonglist = CoolUtil.coolTextFile(directorys[i] + 'data/freeplaySonglist.txt');
+
+			for (i in 0...initSonglist.length)
+			{
+				var stuff:Array<String> = initSonglist[i].split(',');
+				songs.push(new SongMetadata(stuff[0], Std.parseInt(stuff[1]), stuff[2]));
+			}
 		}
 
 		/* 
@@ -233,6 +243,7 @@ class FreeplayState extends MusicBeatState
 
 			PlayState.SONG = Song.loadFromJson(poop, songs[curSelected].songName.toLowerCase());
 			PlayState.isStoryMode = false;
+			PlayState.diffArray = diffArray;
 			PlayState.storyDifficulty = curDifficulty;
 
 			PlayState.storyWeek = songs[curSelected].week;

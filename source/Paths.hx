@@ -184,6 +184,18 @@ class Paths
 			return 'assets/fonts/$key';
 	}
 
+	inline static public function modules(key:String)
+	{
+		#if desktop
+		if (FileSystem.exists(Paths.modModules(key)))
+		{
+			return modModules(key);
+		}
+		else
+		#end
+			return getPreloadPath('modules/$key.hxs');
+	}
+
 	inline static public function getSparrowAtlas(key:String, ?library:String)
 	{
 		return FlxAtlasFrames.fromSparrow(image(key, library), file('images/$key.xml', library));
@@ -311,6 +323,11 @@ class Paths
 		}
 
 		return null;
+	}
+
+	inline static public function modModules(key:String)
+	{
+		return mods('modules/$key.hxs');
 	}
 
 	inline static public function removeLoadedImages()

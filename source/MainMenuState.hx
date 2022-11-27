@@ -34,6 +34,10 @@ class MainMenuState extends MusicBeatState
 	var magenta:FlxSprite;
 	var camFollow:FlxObject;
 
+	var versionShit:FlxText;
+	var gameVersion:String = "v" + Application.current.meta.get('version');
+	var fpsInfo:String = ' | Press Left + Shift to decrease Fps Cap and Right + Shift to increase.';
+
 	override function create()
 	{
 		#if desktop
@@ -96,7 +100,7 @@ class MainMenuState extends MusicBeatState
 
 		FlxG.camera.follow(camFollow, null, 0.06);
 
-		var versionShit:FlxText = new FlxText(5, FlxG.height - 18, 0, "v" + Application.current.meta.get('version'), 12);
+		versionShit = new FlxText(5, FlxG.height - 36, 0, gameVersion + '\nFPS Cap: ' + FlxG.save.data.fpsR + fpsInfo, 12);
 		versionShit.scrollFactor.set();
 		versionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(versionShit);
@@ -191,6 +195,11 @@ class MainMenuState extends MusicBeatState
 					});
 				}
 			}
+
+			if (FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.LEFT)
+				fpsDown(10);
+			if (FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.RIGHT)
+				fpsUp(10);
 		}
 
 		super.update(elapsed);
@@ -222,5 +231,26 @@ class MainMenuState extends MusicBeatState
 
 			spr.updateHitbox();
 		});
+	}
+
+	function fpsUp(value:Float = 10)
+	{
+		FlxG.save.data.fpsR += value;
+
+		var fpsCap:Float = FlxG.save.data.fpsR;
+
+		Main.setFramerateCap(FlxG.save.data.fpsR);
+
+		versionShit.text = gameVersion + '\nFPS Cap: ' + fpsCap + fpsInfo;
+	}
+	
+	function fpsDown(value:Float = 10)
+	{
+		FlxG.save.data.fpsR -= value;
+
+		var fpsCap:Float = FlxG.save.data.fpsR;
+		Main.setFramerateCap(FlxG.save.data.fpsCap);
+
+		versionShit.text = gameVersion + '\nFPS Cap: ' + fpsCap + fpsInfo;
 	}
 }

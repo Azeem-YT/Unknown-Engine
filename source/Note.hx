@@ -4,6 +4,12 @@ import flixel.FlxSprite;
 import flixel.graphics.frames.FlxAtlasFrames;
 import flixel.math.FlxMath;
 import flixel.util.FlxColor;
+import flixel.system.*;
+import flixel.util.*;
+import flixel.*;
+import flixel.text.*;
+import flixel.math.*;
+import flixel.graphics.*;
 import UnkownModule.ModuleHandler;
 import haxe.Exception;
 import haxe.ds.StringMap;
@@ -64,17 +70,13 @@ class Note extends FlxSprite
 	public var healthLoss:Float = 0.05;
 	public var hitCauseMiss:Bool = false;
 
-	public var noteModule:Array<NoteModule> = [];
-	public var noteModuleHandler:NoteModuleHandler;
-
-	public static var parser:Parser;
-	public static var vars:StringMap<Dynamic>;
-
 	public var customAnims:Bool = false;
 	public var inCharter:Bool = false;
 
 	public var daAnims:Array<String> = [];
 	public var isThreePlayerNote:Bool = false;
+	public var noteTypeSet:Bool = false;
+	public var modifiedPos:Bool = false;
 
 	function set_noteType(daNoteType:String)
 	{
@@ -115,7 +117,10 @@ class Note extends FlxSprite
 		if (noteType != null && noteType != "none" && noteType != "")
 			this.noteType = noteType;
 		else
+		{
 			this.noteType = 'normal';
+			noteTypeSet = true;
+		}
 
 		// MAKE SURE ITS DEFINITELY OFF SCREEN?
 		y -= 2000;
@@ -132,99 +137,9 @@ class Note extends FlxSprite
 		else
 			curStyle = 'normal';
 
-		noteModuleHandler = new NoteModuleHandler();
-
-		var moduleDir:String = Paths.getPreloadPath('modules/noteTypes/');
-
-		var directorys:Array<String> = [Paths.getPreloadPath()];
-
-		#if desktop
-		directorys.push(Paths.getModPreloadPath());
-		#end
-
-		for (dir in 0...directorys.length)
-		{
-			var moduleDir = directorys[dir] + 'modules/noteTypes/';
-
-			if (FileSystem.isDirectory(moduleDir))
-			{
-				for (file in FileSystem.readDirectory(moduleDir))
-				{
-					var path = haxe.io.Path.join([moduleDir, file]);
-					if (file == noteType + '.hxs')
-					{
-						setVars();
-						var module = noteModuleHandler.loadModule(moduleDir + file);
-						if (module != null)
-						{
-							noteModule.push(module);
-						}
-					}
-				}
-			}
-		}
-
 		set_noteType(noteType);
 
-		switch (noteData)
-		{
-			case 0:
-				animation.play('purpleScroll');
-			case 1:
-				animation.play('blueScroll');
-			case 2:
-				animation.play('greenScroll');
-			case 3:
-				animation.play('redScroll');
-		}
-
-		if (isSustainNote && prevNote != null)
-		{
-			if (Main.gameSettings.getSettingBool("Downscroll"))
-				flipY = true;
-
-			noteScore * 0.2;
-			alpha = 0.6;
-
-			if (Main.gameSettings.getSettingBool("Middlescroll") && !isPlayer && !inCharter)
-				alpha = 0;
-
-			switch (noteData)
-			{
-				case 2:
-					animation.play('greenholdend');
-				case 3:
-					animation.play('redholdend');
-				case 1:
-					animation.play('blueholdend');
-				case 0:
-					animation.play('purpleholdend');
-			}
-
-			updateHitbox();
-
-			if (curStyle == 'pixel')
-				x += 30;
-
-			if (prevNote.isSustainNote)
-			{
-				switch (prevNote.noteData)
-				{
-					case 0:
-						prevNote.animation.play('purplehold');
-					case 1:
-						prevNote.animation.play('bluehold');
-					case 2:
-						prevNote.animation.play('greenhold');
-					case 3:
-						prevNote.animation.play('redhold');
-				}
-
-				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * PlayState.SONG.speed;
-				prevNote.updateHitbox();
-				// prevNote.setGraphicSize();
-			}
-		}
+		playNoteAnim();
 	}
 
 	function callNote(skinPath:String)
@@ -247,7 +162,7 @@ class Note extends FlxSprite
 			switch (curStyle)
 			{
 				case 'pixel':
-					loadGraphic(Paths.image('weeb/pixelUI/arrows-pixels'), true, 17, 17);
+					loadGraphic(Paths.image('weeb/pixelUI/arrows-pixels', 'week6'), true, 17, 17);
 
 					animation.add('greenScroll', [6]);
 					animation.add('redScroll', [7]);
@@ -256,7 +171,7 @@ class Note extends FlxSprite
 
 					if (isSustainNote)
 					{
-						loadGraphic(Paths.image('weeb/pixelUI/arrowEnds'), true, 7, 6);
+						loadGraphic(Paths.image('weeb/pixelUI/arrowEnds', 'week6'), true, 7, 6);
 
 						animation.add('purpleholdend', [4]);
 						animation.add('greenholdend', [6]);
@@ -335,7 +250,7 @@ class Note extends FlxSprite
 			switch (curStyle)
 			{
 				case 'pixel':
-					loadGraphic(Paths.image('weeb/pixelUI/arrows-pixels'), true, 17, 17);
+					loadGraphic(Paths.image('weeb/pixelUI/arrows-pixels', 'week6'), true, 17, 17);
 
 					animation.add('greenScroll', [6]);
 					animation.add('redScroll', [7]);
@@ -344,7 +259,7 @@ class Note extends FlxSprite
 
 					if (isSustainNote)
 					{
-						loadGraphic(Paths.image('weeb/pixelUI/arrowEnds'), true, 7, 6);
+						loadGraphic(Paths.image('weeb/pixelUI/arrowEnds', 'week6'), true, 7, 6);
 
 						animation.add('purpleholdend', [4]);
 						animation.add('greenholdend', [6]);
@@ -413,7 +328,7 @@ class Note extends FlxSprite
 			alpha = 0;
 	}
 
-	function loadAnimations()
+	public function loadAnimations()
 	{
 		animation.addByPrefix('greenScroll', 'green0');
 		animation.addByPrefix('redScroll', 'red0');
@@ -433,6 +348,69 @@ class Note extends FlxSprite
 		setGraphicSize(Std.int(width * 0.7));		
 		updateHitbox();
 		antialiasing = FlxG.save.data.antialiasing;
+	}
+
+	public function playNoteAnim()
+	{
+		switch (noteData)
+		{
+			case 0:
+				animation.play('purpleScroll');
+			case 1:
+				animation.play('blueScroll');
+			case 2:
+				animation.play('greenScroll');
+			case 3:
+				animation.play('redScroll');
+		}
+
+		if (isSustainNote && prevNote != null)
+		{
+			if (Main.gameSettings.getSettingBool("Downscroll"))
+				flipY = true;
+
+			noteScore * 0.2;
+			alpha = 0.6;
+
+			if (Main.gameSettings.getSettingBool("Middlescroll") && !isPlayer && !inCharter)
+				alpha = 0;
+
+			switch (noteData)
+			{
+				case 2:
+					animation.play('greenholdend');
+				case 3:
+					animation.play('redholdend');
+				case 1:
+					animation.play('blueholdend');
+				case 0:
+					animation.play('purpleholdend');
+			}
+
+			updateHitbox();
+
+			if (curStyle == 'pixel')
+				x += 30;
+
+			if (prevNote.isSustainNote)
+			{
+				switch (prevNote.noteData)
+				{
+					case 0:
+						prevNote.animation.play('purplehold');
+					case 1:
+						prevNote.animation.play('bluehold');
+					case 2:
+						prevNote.animation.play('greenhold');
+					case 3:
+						prevNote.animation.play('redhold');
+				}
+
+				prevNote.scale.y *= Conductor.stepCrochet / 100 * 1.5 * PlayState.SONG.speed;
+				prevNote.updateHitbox();
+				// prevNote.setGraphicSize();
+			}
+		}
 	}
 
 	override function update(elapsed:Float)
@@ -465,99 +443,50 @@ class Note extends FlxSprite
 				alpha = 0.3;
 		}
 	}
+}
 
-	public function setVars()
+class NoteModuleHandler
+{
+	public static var parser:Parser;
+	public static var vars:StringMap<Dynamic>;
+
+	public function new(){
+	}
+
+	public static function setVars()
 	{
 		parser = new Parser();
+		parser.allowTypes = true;
 
 		vars = new StringMap<Dynamic>();
 
 		vars.set("Sys", Sys);
 		vars.set("Std", Std);
-		vars.set("FlxMath", FlxMath);
 		vars.set("Conductor", Conductor);
 		vars.set("MusicBeatState", MusicBeatState);
 		vars.set("PlayState", PlayState);
-		vars.set("Notes", Note);
+		vars.set("Note", Note);
 		vars.set("Paths", Paths);
 		vars.set("StringTools", StringTools);
 		vars.set("FlxG", FlxG);
+		vars.set("FlxTimer", FlxTimer);
+		vars.set("FlxSprite", FlxSprite);
+		vars.set("FlxText", FlxText);
+		vars.set("FlxMath", FlxMath);
+		vars.set("Math", Math);
 		vars.set("Bool", Bool);
 		vars.set("String", String);
 		vars.set("Float", Float);
 		vars.set("Int", Int);
-		vars.set("setFramePath", setFramePath);
-		vars.set("addByPrefix", animation.addByPrefix);
-		vars.set("setNoteX", setNoteX);
-		vars.set("setNoteY", setNoteY);
-		vars.set("setHealthGain", setHealthGain);
-		vars.set("setHealthLoss", setHealthLoss);
-		vars.set("setXOffset", setXOffset);
-		vars.set("setYOffset", setYOffset);
-		vars.set("setHitCauseMiss", setHitCauseMiss);
-		vars.set("debugTrace", debugTrace);
 		vars.set("playSound", FlxG.sound.play);
 	}
 
-	public function debugTrace(text:String = "")
-	{
-		trace(text);
-	}
-
-	public function setHitCauseMiss(value:Bool)
-	{
-		hitCauseMiss = value;
-	}
-
-	public function setHealthGain(value:Float)
-	{
-		healthGain = value;
-	}
-	
-	public function setHealthLoss(value:Float)
-	{
-		healthLoss = value;
-	}
-
-	public function setFramePath(path:String)
-	{
-		noteTypePath = path;
-	}
-	
-	public function setXOffset(value:Float)
-	{
-		x += value;
-	}
-
-	public function setYOffset(value:Float)
-	{
-		y += value;
-	}
-
-	public function setNoteY(value:Float)
-	{
-		y = value;
-	}
-
-	public function setNoteX(value:Float)
-	{
-		x = value;
-	}
-}
-
-class NoteModuleHandler
-{
-	public function new()
-	{
-	
-	}
-
-	public function loadModule(path:String, ?params:StringMap<Dynamic>)
+	public static function loadModule(path:String, ?params:StringMap<Dynamic>)
 	{
 		var daPath:String = path;
 
 		if ((daPath != null || daPath != "") && FileSystem.exists(daPath))
-			return new NoteModule(Note.parser.parseString(File.getContent(daPath), daPath), params);
+			return new NoteModule(parser.parseString(File.getContent(daPath), daPath), params);
 		else
 			return null;
 	}
@@ -573,8 +502,8 @@ class NoteModule
 	{
 		interp = new Interp();
 
-		for (i in Note.vars.keys())
-			interp.variables.set(i, Note.vars.get(i));
+		for (i in NoteModuleHandler.vars.keys())
+			interp.variables.set(i, NoteModuleHandler.vars.get(i));
 
 		interp.variables.set("exit", exit);
 		interp.variables.set("exists", exists);

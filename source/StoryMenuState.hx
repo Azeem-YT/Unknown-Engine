@@ -421,7 +421,8 @@ class StoryMenuState extends MusicBeatState
 
 			if (diffic == '-normal')
 				diffic = '';
-
+			
+			PlayState.diffArray = diffArray;
 			PlayState.storyDifficulty = curDifficulty;
 			PlayState.weekName = jsonNames[curWeek];
 

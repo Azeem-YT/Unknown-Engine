@@ -140,7 +140,5 @@ class Main extends Sprite
 		}
 
 		File.saveContent(crashPath, error + "\n");
-
-		Sys.exit(1);
 	}
 }

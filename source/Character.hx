@@ -26,7 +26,18 @@ typedef CharData =
 	var camOffset:Array<Float>;
 	var scale:Float;
 	var healthIcon:String;
+	var animatedIcon:Bool;
 	var animations:Array<AnimData>;
+	var positionOffset:Array<Float>;
+	var iconAnims:Array<String>;
+	var iconIsLooped:Bool;
+	var iconScale:Float;
+	var portraitFrames:String;
+	var portraitEnter:String;
+	var portraitAnims:Array<PortraitData>;
+	var portraitScale:Float;
+	var deathCharacter:String;
+	var deathSound:String;
 }
 
 typedef AnimData =
@@ -37,6 +48,15 @@ typedef AnimData =
 	var fps:Int;
 	var loop:Bool;
 	var offset:Array<Float>;
+}
+
+typedef PortraitData = 
+{
+	var prefix:String;
+	var animName:String;
+	var indices:Array<Int>;
+	var loop:Bool;
+	var fps:Int;
 }
 
 class Character extends FlxSprite
@@ -50,21 +70,29 @@ class Character extends FlxSprite
 
 	public var holdTimer:Float = 0;
 	public var heyTimer:Float = 0;
-	public var specialAnim:Bool = false;
 	public var stunned:Bool = false;
 	public var danceIdle:Bool = false;
 	public var idleDance:String = 'idle';
 	public var canIdle:Bool = true;
 	public var camOffset:Array<Float> = [0,0];
 	public var animationNotes:Array<Dynamic> = [];
+	public var positionOffset:Array<Float>;
 
 	public var healthIcon:String;
 
 	public static var default_character:String = 'bf';
 
 	public var data:CharData;
+	public var healthIconIsAnimated:Bool = false;
+	public var healthIconAnim:Array<String>;
+	public var healthIconLooped:Bool;
+	public var iconScale:Float = 1;
 
 	public var animArray:Array<AnimData>;
+	public var portraitArray:Array<PortraitData>;
+	public var portraitEnter:String = null;
+	public var deathCharacter:String = 'bf';
+	public var deathSound:String = null;
 
 	public function new(x:Float, y:Float, ?character:String = "bf", ?isPlayer:Bool = false)
 	{
@@ -363,6 +391,8 @@ class Character extends FlxSprite
 
 				antialiasing = false;
 
+				deathCharacter = 'bf-pixel-dead';
+
 				flipX = true;
 			case 'bf-pixel-dead':
 				frames = Paths.getSparrowAtlas('weeb/bfPixelsDEAD', "week6");
@@ -550,7 +580,7 @@ class Character extends FlxSprite
 				addOffset('singRIGHTmiss', -41, 43);
 				addOffset('singLEFTmiss', 12, 7);
 				addOffset('singDOWNmiss', -10, -10);
-				addOffset('bfCatch', 0, 0);
+				addOffset('bfCatch');
 
 				healthIcon = 'bf';
 				
@@ -589,9 +619,24 @@ class Character extends FlxSprite
 				else
 					healthIcon = 'icon-face';
 
+				healthIconIsAnimated = data.animatedIcon;
+
+				if (healthIconIsAnimated){
+					if (data.iconAnims != null)
+						healthIconAnim = data.iconAnims;
+
+					healthIconLooped = data.iconIsLooped;
+					if (data.iconScale != 1)
+						iconScale = data.iconScale;
+				}
+
+				portraitArray = data.portraitAnims;
+
 				if (frames != null)
 				{
 					animArray = data.animations;
+
+					positionOffset = data.positionOffset;
 
 					if (animArray != null && animArray.length > 0)
 					{
@@ -612,8 +657,14 @@ class Character extends FlxSprite
 						}
 					}
 
-					if (data.scale > 1 && data.scale < 1)
+					if (data.scale != 1)
 						setGraphicSize(Std.int(width * data.scale));
+
+					if (data.deathCharacter != null)
+						deathCharacter = data.deathCharacter;
+
+					if (data.deathSound != null)
+						deathSound = data.deathSound;
 				}
 				else
 				{
@@ -661,13 +712,17 @@ class Character extends FlxSprite
 		if (healthIcon == null)
 			healthIcon = 'icon-' + curCharacter;
 
+		if (positionOffset != null)
+		{
+			x += positionOffset[0];
+			y += positionOffset[1];
+		}
+
 		getIdle();
 		dance();
 
 		if (isPlayer)
-		{
 			flipX = !flipX;
-		}
 	}
 
 	public function loadOffsetFile(character:String)
@@ -716,14 +771,12 @@ class Character extends FlxSprite
 						playAnim('shoot' + noteData, true);
 						animationNotes.shift();
 					}
-					if(animation.curAnim.finished) playAnim(animation.curAnim.name, false, false, animation.curAnim.frames.length - 3);
+					if(animation.curAnim.finished) 
+						playAnim(animation.curAnim.name, false, false, animation.curAnim.frames.length - 3);
 			case 'gf':
 				if (animation.curAnim.name == 'hairFall' && animation.curAnim.finished && animation.curAnim != null)
 					playAnim('danceRight');
 		}
-
-		if (curCharacter == 'pico-speaker' && animation.curAnim.finished)
-			playAnim('shoot1', true);
 
 		if (curCharacter == 'tankman' && (animation.curAnim.name == 'singDOWN-alt' && !animation.curAnim.finished || animation.curAnim.name == 'singUP-alt' && !animation.curAnim.finished) && animation.curAnim != null)
 			canIdle = false;
@@ -763,25 +816,17 @@ class Character extends FlxSprite
 	{
 		if (!debugMode && canIdle)
 		{
-			switch (curCharacter)
+			if (danceIdle)
 			{
-				case 'pico-speaker':
-					playAnim('shoot1');
-				default:
-					if (danceIdle)
-					{
-						danced = !danced;
+				danced = !danced;
 
-						if (danced)
-							playAnim('danceRight');
-						else
-							playAnim('danceLeft');
-					}
-					else
-					{
-						playAnim(idleDance);
-					}
+				if (danced)
+					playAnim('danceRight');
+				else
+					playAnim('danceLeft');
 			}
+			else
+				playAnim(idleDance);
 		}
 	}
 

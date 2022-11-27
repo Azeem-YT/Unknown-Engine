@@ -710,13 +710,3 @@ class OptionPrefs extends MusicBeatState
 		resetAlpha();
 	}
 }
-
-//class OptionData
-//{
-//	public var optionName:String;
-//
-//	public function new(optionName:String)
-//	{
-//		this.optionName = optionName;
-//	}
-//}
