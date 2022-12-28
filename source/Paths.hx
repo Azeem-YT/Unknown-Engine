@@ -149,8 +149,16 @@ class Paths
 		return 'songs:assets/songs/$song/Inst.$SOUND_EXT';
 	}
 
-	inline static public function image(key:String, ?library:String)
+	inline static public function image(key:String, ?library:String):Any
 	{
+		#if desktop
+		var graphic:FlxGraphic;
+		graphic = getImage(key);
+
+		if (graphic != null)
+			return graphic;
+		#end
+
 		return getPath('images/$key.png', IMAGE, library);
 	}
 
@@ -188,9 +196,7 @@ class Paths
 	{
 		#if desktop
 		if (FileSystem.exists(Paths.modModules(key)))
-		{
 			return modModules(key);
-		}
 		else
 		#end
 			return getPreloadPath('modules/$key.hxs');

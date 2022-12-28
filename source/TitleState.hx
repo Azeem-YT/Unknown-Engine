@@ -56,12 +56,18 @@ class TitleState extends MusicBeatState
 		SaveData.checkKeybinds();
 		SaveData.checkVars();
 
+		FlxG.autoPause = FlxG.save.data.autoPauseG;
+
 		Main.getFPSCounter();
 		Main.setFPSVisible();
-
-		var fpsR:Float = FlxG.save.data.fpsR;
-
-		Main.setFramerateCap(fpsR);
+		
+		if (FlxG.save.data.fpsR != null)
+		{
+			Main.fpsCap = FlxG.save.data.fpsR;
+			Main.setFramerateCap(Main.fpsCap);
+		}
+		else
+			Main.setFramerateCap(144.0);
 
 		curWacky = FlxG.random.getObject(getIntroTextShit());
 
@@ -72,9 +78,9 @@ class TitleState extends MusicBeatState
 		Highscore.load();
 
 		#if FREEPLAY
-		FlxG.switchState(new FreeplayState());
+		ClassShit.switchState(new FreeplayState());
 		#elseif CHARTING
-		FlxG.switchState(new ChartingState());
+		ClassShit.switchState(new ChartingState());
 		#else
 		new FlxTimer().start(1, function(tmr:FlxTimer)
 		{
@@ -268,7 +274,7 @@ class TitleState extends MusicBeatState
 
 			new FlxTimer().start(2, function(tmr:FlxTimer)
 			{			
-				FlxG.switchState(new MainMenuState());
+				ClassShit.switchState(new MainMenuState());
 			});
 			// FlxG.sound.play(Paths.music('titleShoot'), 0.7);
 		}

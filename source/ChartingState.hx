@@ -31,6 +31,7 @@ import openfl.events.IOErrorEvent;
 import openfl.media.Sound;
 import openfl.net.FileReference;
 import openfl.utils.ByteArray;
+import helpers.*;
 #if sys
 import sys.FileSystem;
 import sys.io.File;
@@ -69,8 +70,6 @@ class ChartingState extends MusicBeatState
 	var curRenderedSustains:FlxTypedGroup<FlxSprite>;
 	var gridBlackLines:FlxTypedGroup<FlxSprite>;
 
-	var eventBlackLine:FlxSprite;
-
 	var gridBG:FlxSprite;
 
 	var _song:SwagSong;
@@ -89,7 +88,6 @@ class ChartingState extends MusicBeatState
 	var rightIcon:HealthIcon;
 
 	public var numberLanes:Int;
-	var curSelectedEvent:Int = 0;
 
 	public var noteTypeList:Array<String> = [
 		'Normal',
@@ -152,6 +150,9 @@ class ChartingState extends MusicBeatState
 				gfVersion: 'gf',
 				notePlayerTexture: 'normal',
 				noteOpponentTexture: 'normal',
+				#if desktop
+				events: [],
+				#end
 				stage: 'stage',
 				speed: 1,
 				threePlayer: false,
@@ -164,7 +165,6 @@ class ChartingState extends MusicBeatState
 		addLanes(_song.threePlayer == true ? 3 : 2);
 
 		add(gridBG);
-		add(eventBlackLine);
 		add(gridBlackLines);
 
 		leftIcon = new HealthIcon('bf');
@@ -766,7 +766,7 @@ class ChartingState extends MusicBeatState
 			PlayState.SONG = _song;
 			FlxG.sound.music.stop();
 			vocals.stop();
-			FlxG.switchState(new PlayState());
+			ClassShit.switchState(new PlayState());
 		}
 
 		if (FlxG.keys.justPressed.E)

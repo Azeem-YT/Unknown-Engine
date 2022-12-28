@@ -38,6 +38,7 @@ typedef CharData =
 	var portraitScale:Float;
 	var deathCharacter:String;
 	var deathSound:String;
+	var noAntialiasing:Bool;
 }
 
 typedef AnimData =
@@ -74,6 +75,7 @@ class Character extends FlxSprite
 	public var danceIdle:Bool = false;
 	public var idleDance:String = 'idle';
 	public var canIdle:Bool = true;
+	public var forceNoIdle:Bool = false;
 	public var camOffset:Array<Float> = [0,0];
 	public var animationNotes:Array<Dynamic> = [];
 	public var positionOffset:Array<Float>;
@@ -99,6 +101,7 @@ class Character extends FlxSprite
 		super(x, y);
 
 		animOffsets = new Map<String, Array<Dynamic>>();
+		animOffsets.clear();
 		curCharacter = character;
 		this.isPlayer = isPlayer;
 
@@ -665,6 +668,11 @@ class Character extends FlxSprite
 
 					if (data.deathSound != null)
 						deathSound = data.deathSound;
+
+					if (data.noAntialiasing)
+						antialiasing = false;
+					else
+						antialiasing = true;
 				}
 				else
 				{
@@ -723,6 +731,8 @@ class Character extends FlxSprite
 
 		if (isPlayer)
 			flipX = !flipX;
+
+		updateHitbox();
 	}
 
 	public function loadOffsetFile(character:String)
@@ -751,6 +761,7 @@ class Character extends FlxSprite
 
 				if (curCharacter == 'dad')
 					dadVar = 6.1;
+
 				if (holdTimer >= Conductor.stepCrochet * dadVar * 0.001)
 				{
 					dance();
@@ -776,13 +787,12 @@ class Character extends FlxSprite
 			case 'gf':
 				if (animation.curAnim.name == 'hairFall' && animation.curAnim.finished && animation.curAnim != null)
 					playAnim('danceRight');
+			case 'tankman':
+				if ((animation.curAnim.name == 'singDOWN-alt' && !animation.curAnim.finished || animation.curAnim.name == 'singUP-alt' && !animation.curAnim.finished) && animation.curAnim != null)
+					canIdle = false;
 		}
 
-		if (curCharacter == 'tankman' && (animation.curAnim.name == 'singDOWN-alt' && !animation.curAnim.finished || animation.curAnim.name == 'singUP-alt' && !animation.curAnim.finished) && animation.curAnim != null)
-			canIdle = false;
-		else if (animation.curAnim.finished && !canIdle)
-			canIdle = true;
-		else
+		if (animation.curAnim.finished && !canIdle)
 			canIdle = true;
 
 		super.update(elapsed);
@@ -814,7 +824,7 @@ class Character extends FlxSprite
 
 	public function dance()
 	{
-		if (!debugMode && canIdle)
+		if (!debugMode && canIdle && !forceNoIdle)
 		{
 			if (danceIdle)
 			{

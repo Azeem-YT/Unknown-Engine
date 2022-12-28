@@ -25,6 +25,7 @@ class Main extends Sprite
 	var skipSplash:Bool = true; // Whether to skip the flixel splash screen that appears in release mode.
 	var startFullscreen:Bool = false;
 	public static var gameSettings:GameSettings;
+	public static var fpsCap:Float = 60;
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
@@ -88,7 +89,7 @@ class Main extends Sprite
 
 	public static function setFramerateCap(cap:Float)
 	{
-		openfl.Lib.current.stage.frameRate = cap;
+		openfl.Lib.current.stage.frameRate = fpsCap;
 	}
 
 	public function getframerateCap():Float

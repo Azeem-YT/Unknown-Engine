@@ -40,6 +40,9 @@ class Strum extends FlxSprite
 				characterToPlay[i].playAnim(singAnim[noteData] + '-alt', true);
 			else
 				characterToPlay[i].playAnim(singAnim[noteData], true);
+			
+			if (!characterToPlay[i].isPlayer)
+				characterToPlay[i].holdTimer = 0;
 		}
 	}
 

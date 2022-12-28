@@ -23,6 +23,7 @@ using StringTools;
 class FreeplayState extends MusicBeatState
 {
 	var songs:Array<SongMetadata> = [];
+	var checkSongs:Array<SongMetadata> = [];
 
 	var selector:FlxText;
 	var curSelected:Int = 0;
@@ -55,11 +56,12 @@ class FreeplayState extends MusicBeatState
 		{
 			var initSonglist = CoolUtil.coolTextFile(directorys[i] + 'data/freeplaySonglist.txt');
 
-			for (i in 0...initSonglist.length)
-			{
-				var stuff:Array<String> = initSonglist[i].split(',');
-				songs.push(new SongMetadata(stuff[0], Std.parseInt(stuff[1]), stuff[2]));
-			}
+			if (initSonglist.length > 0 && initSonglist != null)
+				for (i in 0...initSonglist.length)
+				{
+					var stuff:Array<String> = initSonglist[i].split(',');
+					checkSongs.push(new SongMetadata(stuff[0], Std.parseInt(stuff[1]), stuff[2]));
+				}
 		}
 
 		/* 
@@ -102,6 +104,12 @@ class FreeplayState extends MusicBeatState
 		// LOAD MUSIC
 
 		// LOAD CHARACTERS
+
+		for (i in 0...checkSongs.length)
+		{
+			if (checkSongs[i].songName != null && checkSongs[i].songName != '')
+				songs.push(new SongMetadata(checkSongs[i].songName, checkSongs[i].week, checkSongs[i].songCharacter));
+		}
 
 		var bg:FlxSprite = new FlxSprite().loadGraphic(Paths.image('menuBGBlue'));
 		add(bg);
@@ -232,7 +240,7 @@ class FreeplayState extends MusicBeatState
 
 		if (controls.BACK)
 		{
-			FlxG.switchState(new MainMenuState());
+			ClassShit.switchState(new MainMenuState());
 		}
 
 		if (accepted)
@@ -261,10 +269,10 @@ class FreeplayState extends MusicBeatState
 		if (curDifficulty >= diffArray.length)
 			curDifficulty = 0;
 
-		if (!diffArray[curDifficulty].contains('-'))
+		if (diffArray[curDifficulty] != '-' + diffArray[curDifficulty])
 			diff = '-' + diffArray[curDifficulty];
 		else
-			diff = '-' + diffArray[curDifficulty];
+			diff = diffArray[curDifficulty];
 
 		if (diff == '-normal')
 			diff = '';

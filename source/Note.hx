@@ -58,8 +58,6 @@ class Note extends FlxSprite
 	var opponentStyle:String;
 	public var curStyle:String;
 	public var isPlayer:Bool = false;
-
-	public static var currentNoteSkin:String = "Song Dependent";
 	public static var noteSkinPath:String = "NOTE_assets";
 
 	//Module Stuff
@@ -77,6 +75,7 @@ class Note extends FlxSprite
 	public var isThreePlayerNote:Bool = false;
 	public var noteTypeSet:Bool = false;
 	public var modifiedPos:Bool = false;
+	public var modifiedX:Float = 0;
 
 	function set_noteType(daNoteType:String)
 	{
@@ -127,6 +126,9 @@ class Note extends FlxSprite
 		this.strumTime = strumTime;
 
 		this.noteData = noteData;
+
+		if (noteData > 3)
+			this.noteData = 3;
 
 		var daStage:String = PlayState.curStage;
 
@@ -187,18 +189,14 @@ class Note extends FlxSprite
 					setGraphicSize(Std.int(width * PlayState.daPixelZoom));
 					updateHitbox();
 				case 'normal':	
-					if (FileSystem.exists(Paths.modImages('noteSkins/' + PlayState.SONG.notePlayerTexture)) && currentNoteSkin == "Song Dependent")
-					{
-						frames = Paths.getModSparrowAtlas('noteSkins/' + PlayState.SONG.notePlayerTexture);
-					}
-					else if (Assets.exists(Paths.image('noteSkins/' +PlayState.SONG.notePlayerTexture)) && currentNoteSkin == "Song Dependent")
-					{
+					#if desktop
+					frames = Paths.getModSparrowAtlas('noteSkins/' + PlayState.SONG.notePlayerTexture);
+					if (frames == null)
+					#end
 						frames = Paths.getSparrowAtlas('noteSkins/' + PlayState.SONG.notePlayerTexture);
-					}
-					else
-					{
-						frames = Paths.getSparrowAtlas("noteSkins/" + noteSkinPath);
-					}
+
+					if (frames == null)
+						frames = Paths.getSparrowAtlas("noteSkins/" + noteSkinPath, "shared");
 
 					animation.addByPrefix('greenScroll', 'green instance 1');
 					animation.addByPrefix('redScroll', 'red instance 1');
@@ -214,14 +212,19 @@ class Note extends FlxSprite
 					animation.addByPrefix('greenhold', 'green hold piece instance 1');
 					animation.addByPrefix('redhold', 'red hold piece instance 1');
 					animation.addByPrefix('bluehold', 'blue hold piece instance 1');
-
-					animation.addByPrefix("eventNote", "arrow static instance 1");
 
 					setGraphicSize(Std.int(width * 0.7));
 					updateHitbox();
 					antialiasing = FlxG.save.data.antialiasing;
 				default:
-					frames = Paths.getSparrowAtlas("noteSkins/" + noteSkinPath);
+					#if desktop
+					frames = Paths.getModSparrowAtlas('noteSkins/' + PlayState.SONG.notePlayerTexture);
+					if (frames == null)
+					#end
+						frames = Paths.getSparrowAtlas('noteSkins/' + PlayState.SONG.notePlayerTexture);
+
+					if (frames == null)
+						frames = Paths.getSparrowAtlas("noteSkins/" + noteSkinPath, "shared");
 
 					animation.addByPrefix('greenScroll', 'green instance 1');
 					animation.addByPrefix('redScroll', 'red instance 1');
@@ -237,8 +240,6 @@ class Note extends FlxSprite
 					animation.addByPrefix('greenhold', 'green hold piece instance 1');
 					animation.addByPrefix('redhold', 'red hold piece instance 1');
 					animation.addByPrefix('bluehold', 'blue hold piece instance 1');
-
-					animation.addByPrefix("eventNote", "arrow static instance 1");
 
 					setGraphicSize(Std.int(width * 0.7));
 					updateHitbox();
@@ -275,12 +276,14 @@ class Note extends FlxSprite
 					setGraphicSize(Std.int(width * PlayState.daPixelZoom));
 					updateHitbox();
 				case 'normal':
-					if (FileSystem.exists(Paths.modImages(PlayState.SONG.noteOpponentTexture)) && currentNoteSkin == "Song Dependent")
-						frames = Paths.getModSparrowAtlas(PlayState.SONG.noteOpponentTexture);
-					else if (FileSystem.exists(Paths.image(PlayState.SONG.noteOpponentTexture)) && currentNoteSkin == "Song Dependent")
-						frames = Paths.getSparrowAtlas(PlayState.SONG.noteOpponentTexture);
-					else
-						frames = Paths.getSparrowAtlas("noteSkins/" + noteSkinPath);
+					#if desktop
+					frames = Paths.getModSparrowAtlas('noteSkins/' + PlayState.SONG.noteOpponentTexture);
+					if (frames == null)
+					#end
+						frames = Paths.getSparrowAtlas('noteSkins/' + PlayState.SONG.noteOpponentTexture);
+
+					if (frames == null)
+						frames = Paths.getSparrowAtlas("noteSkins/" + noteSkinPath, "shared");
 
 					animation.addByPrefix('greenScroll', 'green instance 1');
 					animation.addByPrefix('redScroll', 'red instance 1');
@@ -301,7 +304,14 @@ class Note extends FlxSprite
 					updateHitbox();
 					antialiasing = FlxG.save.data.antialiasing;
 				default:
-					frames = Paths.getSparrowAtlas("noteSkins/" + noteSkinPath);
+					#if desktop
+					frames = Paths.getModSparrowAtlas('noteSkins/' + PlayState.SONG.noteOpponentTexture);
+					if (frames == null)
+					#end
+						frames = Paths.getSparrowAtlas('noteSkins/' + PlayState.SONG.noteOpponentTexture);
+
+					if (frames == null)
+						frames = Paths.getSparrowAtlas("noteSkins/" + noteSkinPath, "shared");
 
 					animation.addByPrefix('greenScroll', 'green instance 1');
 					animation.addByPrefix('redScroll', 'red instance 1');
@@ -367,7 +377,7 @@ class Note extends FlxSprite
 		if (isSustainNote && prevNote != null)
 		{
 			if (Main.gameSettings.getSettingBool("Downscroll"))
-				flipY = true;
+				angle = 180;
 
 			noteScore * 0.2;
 			alpha = 0.6;
@@ -419,9 +429,8 @@ class Note extends FlxSprite
 
 		if (mustPress)
 		{
-			// The * 0.5 is so that it's easier to hit them too late, instead of too early
 			if (strumTime > Conductor.songPosition - Conductor.safeZoneOffset
-				&& strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * 0.5))
+				&& strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * 0.75))
 				canBeHit = true;
 			else
 				canBeHit = false;

@@ -6,6 +6,9 @@ import flixel.*;
 import flixel.text.*;
 import flixel.math.*;
 import flixel.graphics.*;
+import flixel.input.*;
+import flixel.input.keyboard.*;
+import shaders.*;
 import haxe.Exception;
 import haxe.ds.StringMap;
 import hscript.Expr;
@@ -69,6 +72,21 @@ class ModuleHandler
 		vars.set("FlxTypedGroup", FlxTypedGroup);
 		vars.set("FlxGroup", FlxGroup);
 		vars.set("FlxTypedSpriteGroup", FlxTypedSpriteGroup);
+		vars.set("FlxKeyboard", FlxKeyboard);
+		vars.set("FlxKeyList", FlxKeyList);
+		vars.set("FlxInput", FlxInput);
+		vars.set("FlxCamera", FlxCamera);
+		vars.set("FlxPoint", FlxPoint);
+		vars.set("FlxAnimate", flxanimate.FlxAnimate);
+		vars.set("GraphicShader", GraphicShader);
+		vars.set("Shaders", GraphicShader.Shaders);
+		vars.set("Song", Song);
+		vars.set("Strum", Strum);
+		#if desktop
+		vars.set("Event", Event);
+		#end
+		vars.set("Xml", Xml);
+		vars.set("Reflect", Reflect);
 		vars.set("Math", Math);
 		vars.set("TankBGSprite", TankBGSprite);
 		vars.set("Bool", Bool);
@@ -111,9 +129,13 @@ class ModuleHandler
 		vars.set("killPlayer", PlayState.instance.killPlayer);
 		vars.set("screenCenterObjectX", screenCenterObjectX);
 		vars.set("setTextBorderStyle", setTextBorderStyle);
+		vars.set("setCamBGColorAlpha", setCamBGColorAlpha);
+		vars.set("trace", traceText);
+
+		//Thats a lot of Variables...
 	}
 
-	public function screenCenterX(sprite:FlxSprite)
+	public function screenCenterX(sprite:FlxObject)
 	{
 		sprite.screenCenter(X);
 	}
@@ -121,6 +143,15 @@ class ModuleHandler
 	public function screenCenterObjectX(object:FlxObject)
 	{
 		object.screenCenter(X);
+	}
+
+	public function setCamBGColorAlpha(daCam:FlxCamera, value:Float = 0)
+	{
+		daCam.bgColor.alpha = 0;
+	}
+
+	public function traceText(text:Dynamic) {
+		trace(text);
 	}
 
 	public function setTextBorderStyle(text:FlxText, style:String = 'OUTLINE', color:String = '0', size:Float = 1, quality:Float = 1)

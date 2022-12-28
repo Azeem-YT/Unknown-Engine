@@ -36,7 +36,12 @@ class MainMenuState extends MusicBeatState
 
 	var versionShit:FlxText;
 	var gameVersion:String = "v" + Application.current.meta.get('version');
-	var fpsInfo:String = ' | Press Left + Shift to decrease Fps Cap and Right + Shift to increase.';
+	var realFps:Float = FlxG.save.data.fpsR;
+	var curOption:Int = 0;
+	var optionName:String = "";
+	var optionInfoS:String = ' | Press Left + Shift to decrease and Right + Shift to increase.';
+	var optionInfo:Array<String> = [];
+	var optionArray:Array<String> = ['FPS', 'Strum Offset'];
 
 	override function create()
 	{
@@ -44,6 +49,8 @@ class MainMenuState extends MusicBeatState
 		// Updating Discord Rich Presence
 		DiscordClient.changePresence("In the Menus", null);
 		#end
+
+		optionInfo = ['\nFPS Cap: ' + FlxG.save.data.fpsR + optionInfoS, '\nStrumline offset: ' + FlxG.save.data.strumOffset + optionInfoS];
 
 		transIn = FlxTransitionableState.defaultTransIn;
 		transOut = FlxTransitionableState.defaultTransOut;
@@ -100,7 +107,7 @@ class MainMenuState extends MusicBeatState
 
 		FlxG.camera.follow(camFollow, null, 0.06);
 
-		versionShit = new FlxText(5, FlxG.height - 36, 0, gameVersion + '\nFPS Cap: ' + FlxG.save.data.fpsR + fpsInfo, 12);
+		versionShit = new FlxText(5, FlxG.height - 36, 0, gameVersion + optionInfo[curOption], 12);
 		versionShit.scrollFactor.set();
 		versionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(versionShit);
@@ -137,7 +144,7 @@ class MainMenuState extends MusicBeatState
 
 			if (controls.BACK)
 			{
-				FlxG.switchState(new TitleState());
+				ClassShit.switchState(new TitleState());
 			}
 
 			if (controls.ACCEPT)
@@ -178,17 +185,17 @@ class MainMenuState extends MusicBeatState
 								switch (daChoice)
 								{
 									case 'story mode':
-										FlxG.switchState(new StoryMenuState());
+										ClassShit.switchState(new StoryMenuState());
 										trace("Story Menu Selected");
 									case 'freeplay':
-										FlxG.switchState(new FreeplayState());
+										ClassShit.switchState(new FreeplayState());
 
 										trace("Freeplay Menu Selected");
 
 									case 'options':
 										FlxTransitionableState.skipNextTransIn = true;
 										FlxTransitionableState.skipNextTransOut = true;
-										FlxG.switchState(new OptionsState());
+										ClassShit.switchState(new OptionsState());
 								}
 							});
 						}
@@ -196,10 +203,38 @@ class MainMenuState extends MusicBeatState
 				}
 			}
 
-			if (FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.LEFT)
-				fpsDown(10);
-			if (FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.RIGHT)
-				fpsUp(10);
+			var holdingShift:Bool = FlxG.keys.pressed.SHIFT;
+
+			if (!holdingShift)
+			{
+				if (controls.UI_LEFT_P)
+					changeOption(-1);
+				if (controls.UI_RIGHT_P)
+					changeOption(1);
+			}
+
+			switch (optionName)
+			{
+				case 'FPS':
+					if (FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.LEFT)
+						fpsDown(10);
+					if (FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.RIGHT)
+						fpsUp(10);
+				case 'Strum Offset':
+					if (FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.LEFT)
+						FlxG.save.data.strumOffset -= 1;
+					if (FlxG.keys.pressed.SHIFT && FlxG.keys.justPressed.RIGHT)
+						FlxG.save.data.strumOffset += 1;
+
+					if (FlxG.save.data.strumOffset >= 150)
+						FlxG.save.data.downscroll = true;
+					else
+						FlxG.save.data.downscroll = false;
+
+					Main.gameSettings.saveSettings();
+
+					updateText('\nStrumline offset: ' + FlxG.save.data.strumOffset + optionInfoS);
+			}
 		}
 
 		super.update(elapsed);
@@ -233,24 +268,44 @@ class MainMenuState extends MusicBeatState
 		});
 	}
 
+	function changeOption(change:Int = 0)
+	{
+		curOption += change;
+
+		if (curOption >= optionInfo.length)
+			curOption = 0;
+		if (curOption > 0)
+			curOption = optionInfo.length - 1;
+
+		optionName = optionArray[curOption];
+
+		updateText(optionInfo[curOption]);
+	}
+
 	function fpsUp(value:Float = 10)
 	{
-		FlxG.save.data.fpsR += value;
+		Main.fpsCap += value;
 
-		var fpsCap:Float = FlxG.save.data.fpsR;
+		FlxG.save.data.fpsR = Main.fpsCap;
 
-		Main.setFramerateCap(FlxG.save.data.fpsR);
+		Main.setFramerateCap(Main.fpsCap);
 
-		versionShit.text = gameVersion + '\nFPS Cap: ' + fpsCap + fpsInfo;
+		updateText('\nFPS Cap: ' + Main.fpsCap + optionInfoS);
 	}
 	
 	function fpsDown(value:Float = 10)
 	{
-		FlxG.save.data.fpsR -= value;
+		Main.fpsCap -= value;
 
-		var fpsCap:Float = FlxG.save.data.fpsR;
-		Main.setFramerateCap(FlxG.save.data.fpsCap);
+		FlxG.save.data.fpsR = Main.fpsCap;
 
-		versionShit.text = gameVersion + '\nFPS Cap: ' + fpsCap + fpsInfo;
+		Main.setFramerateCap(Main.fpsCap);
+
+		versionShit.text = '\nFPS Cap: ' + Main.fpsCap + optionInfoS;
+	}
+
+	function updateText(text:Dynamic)
+	{
+		versionShit.text = gameVersion + text;
 	}
 }

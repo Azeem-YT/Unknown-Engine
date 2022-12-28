@@ -19,7 +19,8 @@ class FPS extends TextField
 	private var times:Array<Float>;
 	private var memoryCount:Float;
 	private var maxMemory:Float;
-	private var versionText:String = 'Unknown-Engine Beta 1';
+	private var versionText:String = 'Unknown-Engine Beta 3';
+	public static var currentClass:Dynamic = 'TitleState';
 
 	public function new(x:Float = 10, y:Float = 10, color:Int = 0x000000)
 	{
@@ -31,7 +32,7 @@ class FPS extends TextField
 		currentFPS = 0;
 		selectable = false;
 		mouseEnabled = false;
-		defaultTextFormat = new TextFormat("_sans", 13, color);
+		defaultTextFormat = new TextFormat("_sans", Std.int(13.5), color);
 		autoSize = LEFT;
 		text = "FPS: ";
 
@@ -46,7 +47,6 @@ class FPS extends TextField
 		});
 	}
 
-	// Event Handlers
 	private override function __enterFrame(deltaTime:Float):Void
 	{
 		currentTime += deltaTime;
@@ -58,7 +58,7 @@ class FPS extends TextField
 		}
 
 		var currentCount = times.length;
-		currentFPS = Math.round((currentCount + cacheCount) / 2);
+		currentFPS = Math.round((currentCount + cacheCount) / 4); //Gotta divide by 4 for some reason???
 
 		if (Main.gameSettings.getSettingBool('FPS Counter'))
 		{
@@ -72,7 +72,16 @@ class FPS extends TextField
 			if (maxMemory < memoryCount)
 				maxMemory = memoryCount;
 
-			text = "FPS: " + currentFPS + '\nMemory: ' + memoryCount + ' MB\nMax Memory: ' + maxMemory + ' MB' + '\n' + versionText;
+			text = "FPS: " + currentFPS;
+
+			if (Main.gameSettings.getSettingBool('Show Memory'))
+				text += '\nMemory: ' + memoryCount + ' MB\nMax Memory: ' + maxMemory + ' MB';
+
+			#if debug
+			text += '\nCurrent State: ' + currentClass;
+			#end
+
+			text += '\n' + versionText;
 
 			textColor = 0xFFFFFFFF;
 

@@ -26,6 +26,9 @@ typedef SwagSong =
 	var stage:String;
 	var notePlayerTexture:String;
 	var noteOpponentTexture:String;
+	#if desktop
+	var events:Array<Dynamic>;
+	#end
 	var threePlayer:Bool;
 	var validScore:Bool;
 }

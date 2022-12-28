@@ -24,17 +24,17 @@ class GameSettings
 	public var keybindArray:Array<String> = [FlxG.save.data.leftBind, FlxG.save.data.downBind, FlxG.save.data.upBind, FlxG.save.data.rightBind, FlxG.save.data.uiLeftBind, FlxG.save.data.uiDownBind, FlxG.save.data.uiUpBind, FlxG.save.data.uiRightBind];
 	public var keyBlacklist:Array<String> = ["ENTER", "ESCAPE", "BACKSPACE"];
 	public var gameSettingInfo:Map<String, Dynamic> = [
-		'Downscroll' => [
-			'Downscroll',
-			FlxG.save.data.downscroll,
+		'Botplay' => [
+			'Botplay',
+			FlxG.save.data.botplay,
 			Checkmark,
-			'If Checked, the strumline will be flipped vertically.'
+			''
 		],
-		'Middlescroll' => [
-			'Middlescroll',
-			FlxG.save.data.middlescroll,
+		'Ghost Tapping' => [
+			'Ghost Tapping',
+			FlxG.save.data.ghostTapping,
 			Checkmark,
-			'If Checked, the strumline will be on the middle of the screen.'
+			'If Checked, Ghost Tapping allowing you to press inputs without missing.'
 		],
 		'FPS Counter' => [
 			'FPS Counter',
@@ -42,11 +42,23 @@ class GameSettings
 			Checkmark,
 			'If Checked, an Fps Counter will apear on the top left of the game.'
 		],
-		'Ghost Tapping' => [
-			'Ghost Tapping',
-			FlxG.save.data.ghostTapping,
+		'Middlescroll' => [
+			'Middlescroll',
+			FlxG.save.data.middlescroll,
 			Checkmark,
-			'If Checked, Ghost Tapping allowing you to press inputs without missing.'
+			'If Checked, the strumline will be on the middle of the screen.'
+		],
+		'Downscroll' => [
+			'Downscroll',
+			FlxG.save.data.downscroll,
+			Checkmark,
+			'If Checked, the strumline will be flipped vertically.'
+		],
+		'Game Auto Pause' => [
+			'Game Auto Pause',
+			FlxG.save.data.autoPauseG,
+			Checkmark,
+			'If Checked, the game will pause when clicked off window.'
 		]
 	];
 
@@ -68,6 +80,8 @@ class GameSettings
 		boolSettings.set("Ghost Tapping", FlxG.save.data.ghostTapping);
 		boolSettings.set("FPS Counter", FlxG.save.data.fpsCounter);
 		boolSettings.set("Play Opponent Side", FlxG.save.data.opponentSide);
+		boolSettings.set("Game Auto Pause", FlxG.save.data.autoPauseG);
+		boolSettings.set("Botplay", FlxG.save.data.botplay);
 		keybinds.set("LeftBind", FlxG.save.data.leftBind);
 		keybinds.set("DownBind", FlxG.save.data.downBind);
 		keybinds.set("UpBind", FlxG.save.data.upBind);
@@ -89,17 +103,17 @@ class GameSettings
 	public function saveSettings()
 	{
 		gameSettingInfo = [
-			'Downscroll' => [
-				'Downscroll',
-				FlxG.save.data.downscroll,
+			'Botplay' => [
+				'Botplay',
+				FlxG.save.data.botplay,
 				Checkmark,
-				'If Checked, the strumline will be flipped vertically.'
+				''
 			],
-			'Middlescroll' => [
-				'Middlescroll',
-				FlxG.save.data.middlescroll,
+			'Ghost Tapping' => [
+				'Ghost Tapping',
+				FlxG.save.data.ghostTapping,
 				Checkmark,
-				'If Checked, the strumline will be on the middle of the screen.'
+				'If Checked, Ghost Tapping allowing you to press inputs without missing.'
 			],
 			'FPS Counter' => [
 				'FPS Counter',
@@ -107,11 +121,23 @@ class GameSettings
 				Checkmark,
 				'If Checked, an Fps Counter will apear on the top left of the game.'
 			],
-			'Ghost Tapping' => [
-				'Ghost Tapping',
-				FlxG.save.data.ghostTapping,
+			'Middlescroll' => [
+				'Middlescroll',
+				FlxG.save.data.middlescroll,
 				Checkmark,
-				'If Checked, Ghost Tapping allowing you to press inputs without missing.'
+				'If Checked, the strumline will be on the middle of the screen.'
+			],
+			'Downscroll' => [
+				'Downscroll',
+				FlxG.save.data.downscroll,
+				Checkmark,
+				'If Checked, the strumline will be flipped vertically.'
+			],
+			'Game Auto Pause' => [
+				'Game Auto Pause',
+				FlxG.save.data.autoPauseG,
+				Checkmark,
+				'If Checked, the game will pause when clicked off window.'
 			]
 		];
 
@@ -140,6 +166,8 @@ class GameSettings
 		boolSettings.set("Ghost Tapping", FlxG.save.data.ghostTapping);
 		boolSettings.set("FPS Counter", FlxG.save.data.fpsCounter);
 		boolSettings.set("Play Opponent Side", FlxG.save.data.opponentSide);
+		boolSettings.set("Game Auto Pause", FlxG.save.data.autoPauseG);
+		boolSettings.set("Botplay", FlxG.save.data.botplay);
 		keybinds.set("LeftBind", FlxG.save.data.leftBind);
 		keybinds.set("DownBind", FlxG.save.data.downBind);
 		keybinds.set("UpBind", FlxG.save.data.upBind);
@@ -153,10 +181,6 @@ class GameSettings
 		{
 			var daBool:Bool = boolSettings.get(variable);
 			return daBool;
-		}
-		else
-		{
-			trace("Bool doesn't exist or is null");
 		}
 
 		return true;

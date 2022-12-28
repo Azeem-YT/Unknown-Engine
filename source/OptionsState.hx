@@ -14,6 +14,7 @@ import flixel.math.FlxMath;
 import flixel.FlxCamera;
 import flixel.addons.transition.FlxTransitionableState;
 import optionHelpers.*;
+import helpers.*;
 
 using StringTools;
 
@@ -253,7 +254,7 @@ class OptionsState extends MusicBeatState
 			if (curCategory != 'main')
 				loadCatagory('main');
 			else
-				FlxG.switchState(new MainMenuState());
+				ClassShit.switchState(new MainMenuState());
 		}
 
 	}
@@ -299,7 +300,7 @@ class OptionsState extends MusicBeatState
 			disableInput = true;
 			FlxFlicker.flicker(curSubGroup.members[curSelection], 0.5, 0.06 * 2, true, false, function(flick:FlxFlicker)
 			{
-				FlxG.switchState(new KeyBindState());
+				ClassShit.switchState(new KeyBindState());
 				disableInput = false;
 			});
 		}
@@ -313,7 +314,7 @@ class OptionsState extends MusicBeatState
 			disableInput = true;
 			FlxFlicker.flicker(curSubGroup.members[curSelection], 0.5, 0.06 * 2, true, false, function(flick:FlxFlicker)
 			{
-				FlxG.switchState(new MainMenuState());
+				ClassShit.switchState(new MainMenuState());
 				disableInput = false;
 			});
 		}
@@ -327,7 +328,7 @@ class OptionsState extends MusicBeatState
 			disableInput = true;
 			FlxFlicker.flicker(curSubGroup.members[curSelection], 0.5, 0.06 * 2, true, false, function(flick:FlxFlicker)
 			{
-				FlxG.switchState(new OptionPrefs());
+				ClassShit.switchState(new OptionPrefs());
 				disableInput = false;
 			});
 		}
@@ -466,7 +467,7 @@ class KeyBindState extends MusicBeatState
 				changeSelection(-1);
 
 			if (controls.BACK)
-				FlxG.switchState(new OptionsState());
+				ClassShit.switchState(new OptionsState());
 
 			if (accept)
 			{
@@ -655,7 +656,7 @@ class OptionPrefs extends MusicBeatState
 		}
 
 		if (controls.BACK)
-				FlxG.switchState(new OptionsState());
+				ClassShit.switchState(new OptionsState());
 
 		if (accepted)
 		{
@@ -701,8 +702,17 @@ class OptionPrefs extends MusicBeatState
 				trace("Chosen Ghost Tapping");
 			case 'Play Opponent Side':
 				FlxG.save.data.opponentSide = !optionsVars[curSelected];
+			case 'Show curState':
+				FlxG.save.data.showState = !optionsVars[curSelected];
+			case 'Game Auto Pause':
+				FlxG.save.data.autoPauseG = !optionsVars[curSelected];
+			case 'Botplay':
+				FlxG.save.data.botplay = !optionsVars[curSelected];
 			default:
-				trace("Chosen Option doesn't exist");
+				if (Main.gameSettings.boolSettings.exists(curOption))
+					Main.gameSettings.boolSettings.set(curOption, !Main.gameSettings.getSettingBool(curOption));
+				else
+					Main.gameSettings.boolSettings.set(curOption, true);
 		}
 
 		Main.gameSettings.saveSettings();

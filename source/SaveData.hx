@@ -94,7 +94,13 @@ class SaveData
 			FlxG.save.data.fpsCounter = true;
 		if (FlxG.save.data.opponentSide ==  null)
 			FlxG.save.data.opponentSide = false;
+		if (FlxG.save.data.showState ==  null)
+			FlxG.save.data.showState = false;
 		if (FlxG.save.data.fpsR == null)
 			FlxG.save.data.fpsR = 144.0;
+		if (FlxG.save.data.strumOffset == null)
+			FlxG.save.data.strumOffset = 0;
+		if (FlxG.save.data.autoPauseG == null)
+			FlxG.save.data.autoPauseG = true;
 	}
 }
