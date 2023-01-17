@@ -43,4 +43,14 @@ class CoolUtil
 		}
 		return dumbArray;
 	}
+
+	public static function spaceToDash(text:String):String
+	{
+		var returnValue:String = text;
+
+		if (returnValue != null)
+			returnValue = StringTools.replace(returnValue, " ", "-");
+
+		return returnValue;
+	}
 }

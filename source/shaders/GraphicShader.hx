@@ -2,6 +2,7 @@ package shaders;
 
 import flixel.*;
 import openfl.display.*;
+import openfl.filters.*;
 import openfl.utils.ByteArray;
 import sys.io.File;
 import sys.FileSystem;
@@ -10,17 +11,34 @@ using StringTools;
 
 class Shaders
 {
-	public static var shaders:Map<String, GraphicShader> = new Map<String, GraphicShader>();
+	//public static var shaders:Map<String, GraphicShader> = new Map<String, GraphicShader>();
+	public static var camFilters:Map<FlxCamera, Array<BitmapFilter>> = new Map<FlxCamera, Array<BitmapFilter>>();
 
-	public static function getShader(id:String, ?path:String = null):GraphicShader
+	public static function shaderToCam(cam:FlxCamera, path:String = '')
 	{
-		if (shaders.exists(id))
-			return shaders.get(id);
+		var camShaders:Array<BitmapFilter> = [];
+		var shader:GraphicShader = new GraphicShader(path);
+		if (camFilters.exists(cam))
+		{
+			 camShaders = camFilters.get(cam);
+			 camShaders.push(new ShaderFilter(shader));
+			 camFilters.set(cam, camShaders);
+		}
 		else
 		{
-			var theShader:GraphicShader = new GraphicShader(path);
-			shaders.set(id, theShader);
-			return shaders.get(id); //hopefully this works.
+			camShaders.push(new ShaderFilter(shader));
+			camFilters.set(cam, camShaders);
+		}
+
+		cam.setFilters(camShaders); //Maybe Work?
+	}
+
+	public static function shaderToSprite(sprite:FlxSprite, path:String = '')
+	{
+		if (sprite != null)
+		{
+			//var shader:
+			trace("Not Done Yet.");
 		}
 	}
 }
@@ -115,9 +133,9 @@ class GraphicShader extends Shader
 
 	public function setShaderFrag(fragmentSource:String = null)
 	{
-		if (fragmentSource != null) {
-			fragmentSource = StringTools.replace(this.glFragmentSource, '#pragma header', glFragmentHeader);
-			fragmentSource = StringTools.replace(this.glFragmentSource, '#pragma body', glFragmentBody);
+		if (this.glFragmentSource != null) {
+			this.glFragmentSource = StringTools.replace(this.glFragmentSource, '#pragma header', glFragmentHeader);
+			this.glFragmentSource = StringTools.replace(this.glFragmentSource, '#pragma body', glFragmentBody);
 		}
 	}
 }

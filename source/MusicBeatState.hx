@@ -15,9 +15,10 @@ class MusicBeatState extends FlxUIState
 	public var curStep:Int = 0;
 	public var curBeat:Int = 0;
 	public var controls(get, never):Controls;
+	public static var publicControls:Controls;
 
 	inline function get_controls():Controls
-		return PlayerSettings.player1.controls;
+		return PlayerController.playerControl;
 
 	override function create()
 	{
@@ -25,6 +26,34 @@ class MusicBeatState extends FlxUIState
 			trace('reg ' + transIn.region);
 
 		super.create();
+	}
+
+	public function getControlPress(control:String):Bool
+	{
+		control = control.toLowerCase();
+		var returnValue:Bool = false;
+			
+		switch (control)
+		{
+			case 'ui_left':
+				returnValue = controls.UI_LEFT;
+			case 'ui_down':
+				returnValue = controls.UI_DOWN;
+			case 'ui_up':
+				returnValue = controls.UI_UP;
+			case 'ui_right':
+				returnValue = controls.UI_RIGHT;
+			case 'left':
+				returnValue = controls.LEFT;
+			case 'down':
+				returnValue = controls.DOWN;
+			case 'up':
+				returnValue = controls.UP;
+			case 'right':
+				returnValue = controls.RIGHT;
+		}
+
+		return returnValue;
 	}
 
 	override function update(elapsed:Float)

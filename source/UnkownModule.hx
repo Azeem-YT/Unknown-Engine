@@ -131,6 +131,7 @@ class ModuleHandler
 		vars.set("setTextBorderStyle", setTextBorderStyle);
 		vars.set("setCamBGColorAlpha", setCamBGColorAlpha);
 		vars.set("trace", traceText);
+		vars.set("setColor", setColor);
 
 		//Thats a lot of Variables...
 	}
@@ -174,6 +175,14 @@ class ModuleHandler
 		}
 
 		text.setBorderStyle(textStyle, textColor, size, quality);
+	}
+
+	public function setColor(sprite:FlxSprite, colorString:String = '', ?rgb:Array<Int>)
+	{
+		if (rgb.length > 0 && rgb != null)
+			sprite.color = FlxColor.fromRGB(rgb[0], rgb[1], rgb[2]);
+		else
+			sprite.color = FlxColor.fromString(colorString);
 	}
 
 	public function loadModule(path:String, ?params:StringMap<Dynamic>):UnkownModule

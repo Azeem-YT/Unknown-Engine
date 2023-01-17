@@ -57,7 +57,7 @@ class NoteSplash extends FlxSprite
             offset.set(10, 10);
 
         if (alpha <= 0)
-            alpha = 1;
+            alpha = 0.8;
 
         if (threePlayer)
         {

@@ -45,6 +45,7 @@ class Note extends FlxSprite
 	public var isSustainNote:Bool = false;
 	public var noteType:String = null;
 	public var noAnim:Bool = false;
+	public var modifiedNote:Bool = false;
 
 	public var noteScore:Float = 1;
 
@@ -333,9 +334,6 @@ class Note extends FlxSprite
 					antialiasing = FlxG.save.data.antialiasing;
 			}
 		}
-
-		if (Main.gameSettings.getSettingBool("Middlescroll") && !isPlayer && !inCharter)
-			alpha = 0;
 	}
 
 	public function loadAnimations()
@@ -427,16 +425,23 @@ class Note extends FlxSprite
 	{
 		super.update(elapsed);
 
+		var safeZone = Conductor.safeZoneOffset * 0.5;
+
 		if (mustPress)
 		{
-			if (strumTime > Conductor.songPosition - Conductor.safeZoneOffset
-				&& strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * 0.75))
-				canBeHit = true;
+			if (PlayState.usingBotPlay)
+				canBeHit = (strumTime <= Conductor.songPosition);
 			else
-				canBeHit = false;
+			{
+				if (strumTime > Conductor.songPosition - Conductor.safeZoneOffset
+					&& strumTime < Conductor.songPosition + safeZone)
+					canBeHit = true;
+				else
+					canBeHit = false;
 
-			if (strumTime < Conductor.songPosition - Conductor.safeZoneOffset && !wasGoodHit)
-				tooLate = true;
+				if (strumTime < Conductor.songPosition - Conductor.safeZoneOffset && !wasGoodHit)
+					tooLate = true;
+			}
 		}
 		else
 		{

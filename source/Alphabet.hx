@@ -22,6 +22,8 @@ class Alphabet extends FlxSpriteGroup
 	public var disableX:Bool = false;
 	public var xShit = 100;
 	public var isMenuItem:Bool = false;
+	public var alphaChars:Array<AlphaCharacter> = [];
+	public var lastLetter:Int = 0;
 
 	public var text:String = "";
 
@@ -34,7 +36,8 @@ class Alphabet extends FlxSpriteGroup
 
 	// custom shit
 	// amp, backslash, question mark, apostrophy, comma, angry faic, period
-	var lastSprite:AlphaCharacter;
+	public var lastSprite:AlphaCharacter;
+	public var firstSprite:AlphaCharacter;
 	var xPosResetted:Bool = false;
 	var lastWasSpace:Bool = false;
 
@@ -106,10 +109,35 @@ class Alphabet extends FlxSpriteGroup
 				add(letter);
 
 				lastSprite = letter;
+				if (firstSprite == null)
+					firstSprite = letter;
+				alphaChars.push(letter);
 			}
-
-			// loopNum += 1;
 		}
+	}
+
+	public function setText(newText:String)
+	{
+		newText = newText.replace('\\n', '\n');
+		removeLetters();
+		splitWords = [];
+		_finalText = newText;
+		text = newText;
+		addText();
+	}
+
+	public function removeLetters()
+	{
+		forEach(function(lttr:FlxSprite){
+			lttr.kill();
+			lttr.destroy();
+			remove(lttr);
+		});
+
+		lastSprite = null;
+		firstSprite = null;
+
+		alphaChars = [];
 	}
 
 	function doSplitWords():Void
@@ -271,8 +299,6 @@ class AlphaCharacter extends FlxSprite
 		animation.addByPrefix(letter, letter + " " + letterCase, 24);
 		animation.play(letter);
 		updateHitbox();
-
-		FlxG.log.add('the row' + row);
 
 		y = (110 - height);
 		y += row * 60;

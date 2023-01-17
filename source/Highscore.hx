@@ -7,9 +7,11 @@ class Highscore
 	#if (haxe >= "4.0.0")
 	public static var songScores:Map<String, Int> = new Map();
 	public static var weekScores:Map<String, Int> = new Map();
+	public static var beatenSongs:Map<String, Bool> = new Map();
 	#else
 	public static var songScores:Map<String, Int> = new Map<String, Int>();
-	public static var weekScores:Map<String, Int> = new Map();
+	public static var weekScores:Map<String, Int> = new Map<String, Int>();
+	public static var beatenSongs:Map<String, Bool> = new Map<String, Bool>();
 	#end
 
 
@@ -47,6 +49,23 @@ class Highscore
 		// Reminder that I don't need to format this song, it should come formatted!
 		songScores.set(song, score);
 		FlxG.save.data.songScores = songScores;
+		FlxG.save.flush();
+	}
+
+	public static function songBeat(song:String):Bool
+	{
+		song = song.toLowerCase();
+		if (beatenSongs.exists(song))
+			return true;
+		else
+			return false;
+	}
+
+	public static function saveSongBeat(song:String)
+	{
+		song = song.toLowerCase();
+		beatenSongs.set(song, true);
+		FlxG.save.data.beatenSongs = beatenSongs;
 		FlxG.save.flush();
 	}
 
@@ -92,5 +111,8 @@ class Highscore
 		{
 			weekScores = FlxG.save.data.weekScores;
 		}
+
+		if (FlxG.save.data.beatenSongs != null)
+			beatenSongs = FlxG.save.data.beatenSongs;
 	}
 }

@@ -18,15 +18,6 @@ import helpers.*;
 
 using StringTools;
 
-enum SettingTypes
-{
-	Int;
-	Checkmark;
-	Bool;
-	Float;
-	String;
-}
-
 class OptionsState extends MusicBeatState
 {	
 	private var catagorys:Map<String, Dynamic>;
@@ -41,32 +32,13 @@ class OptionsState extends MusicBeatState
 
 	override public function create()
 	{
-		transIn = FlxTransitionableState.defaultTransIn;
-		transOut = FlxTransitionableState.defaultTransOut;
-
 		catagorys = [
-			'main'=> [
-				[
-					['preferences', switchPref],
-					['controls', openKeymenu],
-					['Exit', exitMenu]
-				]
-			],
-			'preferences' => [
-				[
-					['Downscroll', getOptions],
-					['Middlescroll', getOptions],
-					['Ghost Tapping', getOptions],
-					['FPS Counter', getOptions]
-				]
-			]
+			'Exit' => exitMenu,
+			'Mods' => modPref, //Not Done
+			'Notes' => notePref, //Not Done
+			'Game Controls' => openKeymenu,
+			'preferences' => switchPref
 		];
-
-		for (fuckShit in catagorys.keys())
-		{
-			catagorys.get(fuckShit)[1] = returnSubGroup(fuckShit);
-			catagorys.get(fuckShit)[2] = returnOptionType(catagorys.get(fuckShit)[1]);
-		}
 
 		var bg:FlxSprite = new FlxSprite(-80).loadGraphic(Paths.image('menuDesat'));
 		bg.scrollFactor.x = 0;
@@ -90,37 +62,21 @@ class OptionsState extends MusicBeatState
 
 	function loadCatagory(category:String)
 	{
-		if (infoTexts != null)
-			remove(infoTexts);
-
-		if (thingie != null)
-			remove(thingie);
-
 		if (curSubGroup != null)
 			remove(curSubGroup);
 
-		curSubGroup = catagorys.get(category)[1];
+		curSubGroup = returnMainGroup();
 		add(curSubGroup);
 
 		for (i in 0...curSubGroup.length)
 		{
-			curSubGroup.members[i].y = (70 * 1.5 * i) + 30 + 155;
-			curSubGroup.members[i].x = curSubGroup.members[i].x - 10;
+			curSubGroup.members[i].y = (70 * 1.5 * i) + 30 + 155 - (15 * i);
+			curSubGroup.members[i].y -= 5 * curSubGroup.length - 1;
+			curSubGroup.members[i].x -= 10;
 		}
 
 		curCategory = category;
 
-		alphabetMap = catagorys.get(category)[2];
-		thingie = new FlxTypedGroup<FlxBasic>();
-		for (idk in curSubGroup)
-			if (alphabetMap.get(idk) != null)
-				thingie.add(alphabetMap.get(idk));
-
-		add(thingie);
-
-		add(infoTexts);
-
-		// reset the selection
 		curSelection = 0;
 		changeSelection();
 	}
@@ -133,23 +89,22 @@ class OptionsState extends MusicBeatState
 
 		curSelection += selection;
 
-		// wrap the current selection
 		if (curSelection < 0)
 			curSelection = curSubGroup.length - 1;
-		else if (curSelection >= curSubGroup.length)
+		
+		if (curSelection >= curSubGroup.length)
 			curSelection = 0;
 
 		for (i in 0...curSubGroup.length)
 		{
 			curSubGroup.members[i].alpha = 0.6;
-			if (alphabetMap != null)
-				setAlpha(alphabetMap.get(curSubGroup.members[i]), 0.6);
+			if (i == curSelection)
+				curSubGroup.members[i].alpha = 1;
+
 			curSubGroup.members[i].targetY = (i - curSelection) / 2;
 		}
 
-		if (curSubGroup.members[curSelection] != null) curSubGroup.members[curSelection].alpha = 1;
-
-		curSelectedScript = catagorys.get(curCategory)[0][curSelection][1];
+		curSelectedScript = catagorys.get(curSubGroup.members[curSelection].text);
 	}
 
 	private function setAlpha(sprite:FlxSprite, newValue:Float = 1)
@@ -168,13 +123,6 @@ class OptionsState extends MusicBeatState
 			{
 				switch (Main.gameSettings.gameSettingInfo.get(shitInMyPants.text)[1])
 				{
-					case GameSettings.SettingTypes.Checkmark:
-						// checkmark
-						var checkmark:CheckBox = new CheckBox(10, shitInMyPants.y);
-						add(checkmark);
-						checkmark.playAnim(Std.string(Main.gameSettings.boolSettings.get(shitInMyPants.text)) + '-finished');
-
-						returnGroup.set(shitInMyPants, checkmark);
 					default:
 						// dont do anything
 						//im too lazy to do int and other stuff
@@ -192,24 +140,6 @@ class OptionsState extends MusicBeatState
 		{
 			switch (Main.gameSettings.gameSettingInfo.get(curSubGroup.members[curSelection].text)[1])
 			{
-				case GameSettings.SettingTypes.Checkmark:
-					if (controls.ACCEPT)
-					{
-						FlxG.sound.play(Paths.sound('confirmMenu'));
-						disableInput = true;
-						FlxFlicker.flicker(curSubGroup.members[curSelection], 0.5, 0.06 * 2, true, false, function(flick:FlxFlicker)
-						{
-							Main.gameSettings.boolSettings.set(curSubGroup.members[curSelection].text,
-								!Main.gameSettings.boolSettings.get(curSubGroup.members[curSelection].text));
-							playCheckmarkAnim(alphabetMap.get(curSubGroup.members[curSelection]),
-								Main.gameSettings.boolSettings.get(curSubGroup.members[curSelection].text));
-
-							// save the setting
-							Main.gameSettings.saveSettings();
-							trace("Setting Bool to: " + Main.gameSettings.boolSettings.get(curSubGroup.members[curSelection].text));
-							disableInput = false;
-						});
-					}
 				default:
 					// dont do anything
 					//im too lazy to do int and other stuff
@@ -217,22 +147,20 @@ class OptionsState extends MusicBeatState
 		}
 	}
 
-	private function returnSubGroup(groupName:String):FlxTypedGroup<Alphabet>
+	private function returnMainGroup():FlxTypedGroup<Alphabet>
 	{
 		var newGroup:FlxTypedGroup<Alphabet> = new FlxTypedGroup<Alphabet>();
+		var curI:Int = 0;
 
-		for (i in 0...catagorys.get(groupName)[0].length)
+		for (shit in catagorys.keys())
 		{
-			if (Main.gameSettings.gameSettingInfo.get(catagorys.get(groupName)[0][i][0]) == null)
-			{
-				var newOption:Alphabet = new Alphabet(0, 0, catagorys.get(groupName)[0][i][0], true, false);
-				newOption.screenCenter();
-				newOption.targetY = i;
-				if (groupName != 'main')
-					newOption.isMenuItem = true;
-				newOption.alpha = 0.6;
-				newGroup.add(newOption);
-			}
+			var newOption:Alphabet = new Alphabet(0, 0, shit, true, false);
+			newOption.screenCenter();
+			newOption.targetY = curI;
+			newOption.alpha = 0.6;
+			newGroup.add(newOption);
+
+			curI++;
 		}
 
 		return newGroup;
@@ -242,7 +170,7 @@ class OptionsState extends MusicBeatState
 	{
 		if (!disableInput)
 		{
-			if (curSelectedScript != null)
+			if (curSelectedScript != null && controls.ACCEPT)
 				curSelectedScript();
 
 			updateControls();
@@ -281,57 +209,69 @@ class OptionsState extends MusicBeatState
 
 	public function changeGroup()
 	{
-		if (controls.ACCEPT)
+		FlxG.sound.play(Paths.sound('confirmMenu'));
+		disableInput = true;
+		FlxFlicker.flicker(curSubGroup.members[curSelection], 0.5, 0.06 * 2, true, false, function(flick:FlxFlicker)
 		{
-			FlxG.sound.play(Paths.sound('confirmMenu'));
-			disableInput = true;
-			FlxFlicker.flicker(curSubGroup.members[curSelection], 0.5, 0.06 * 2, true, false, function(flick:FlxFlicker)
-			{
-				loadCatagory(curSubGroup.members[curSelection].text);
-			});
-		}
+			loadCatagory(curSubGroup.members[curSelection].text);
+			disableInput = false;
+		});
 	}
 
 	public function openKeymenu()
 	{
-		if (controls.ACCEPT)
+		FlxG.sound.play(Paths.sound('confirmMenu'));
+		disableInput = true;
+		FlxFlicker.flicker(curSubGroup.members[curSelection], 0.5, 0.06 * 2, true, false, function(flick:FlxFlicker)
 		{
-			FlxG.sound.play(Paths.sound('confirmMenu'));
-			disableInput = true;
-			FlxFlicker.flicker(curSubGroup.members[curSelection], 0.5, 0.06 * 2, true, false, function(flick:FlxFlicker)
-			{
-				ClassShit.switchState(new KeyBindState());
-				disableInput = false;
-			});
-		}
+			ClassShit.switchState(new KeyBindState());
+			disableInput = false;
+		});
+		
 	}
 
 	public function exitMenu()
 	{
-		if (controls.ACCEPT)
+		FlxG.sound.play(Paths.sound('confirmMenu'));
+		disableInput = true;
+		FlxFlicker.flicker(curSubGroup.members[curSelection], 0.5, 0.06 * 2, true, false, function(flick:FlxFlicker)
 		{
-			FlxG.sound.play(Paths.sound('confirmMenu'));
-			disableInput = true;
-			FlxFlicker.flicker(curSubGroup.members[curSelection], 0.5, 0.06 * 2, true, false, function(flick:FlxFlicker)
-			{
-				ClassShit.switchState(new MainMenuState());
-				disableInput = false;
-			});
-		}
+			ClassShit.switchState(new MainMenuState());
+			disableInput = false;
+		});
 	}
 
 	public function switchPref()
 	{
-		if (controls.ACCEPT)
+		FlxG.sound.play(Paths.sound('confirmMenu'));
+		disableInput = true;
+		FlxFlicker.flicker(curSubGroup.members[curSelection], 0.5, 0.06 * 2, true, false, function(flick:FlxFlicker)
 		{
-			FlxG.sound.play(Paths.sound('confirmMenu'));
-			disableInput = true;
-			FlxFlicker.flicker(curSubGroup.members[curSelection], 0.5, 0.06 * 2, true, false, function(flick:FlxFlicker)
-			{
-				ClassShit.switchState(new OptionPrefs());
-				disableInput = false;
-			});
-		}
+			ClassShit.switchState(new OptionPrefs());
+			disableInput = false;
+		});
+	}
+	
+	public function modPref()
+	{
+		FlxG.sound.play(Paths.sound('confirmMenu'));
+		disableInput = true;
+		FlxFlicker.flicker(curSubGroup.members[curSelection], 0.5, 0.06 * 2, true, false, function(flick:FlxFlicker)
+		{
+			ClassShit.switchState(new ModPrefs());
+			disableInput = false;
+		});
+	}
+	
+	public function notePref()
+	{
+		FlxG.sound.play(Paths.sound('confirmMenu'));
+		disableInput = true;
+		FlxFlicker.flicker(curSubGroup.members[curSelection], 0.5, 0.06 * 2, true, false, function(flick:FlxFlicker)
+		{
+			ClassShit.switchState(new NotePrefs());
+			disableInput = false;
+		});
 	}
 }
 
@@ -375,15 +315,16 @@ class KeyBindState extends MusicBeatState
 
 		prompt = new FlxSprite(0, 0).makeGraphic(FlxG.width - 200, FlxG.height - 200, FlxColor.fromRGB(250, 253, 109));
 		prompt.screenCenter();
+		changeKeyPrompt.add(prompt);
 
-		promptText = new Alphabet(0, 0, "Press any key to rebind", true, false);
+		promptText = new Alphabet(0, prompt.y + prompt.height, "Press any key to rebind", true, false);
 		promptText.screenCenter();
-		promptText.y += 50;
+		promptText.y = prompt.y + prompt.height;
 		changeKeyPrompt.add(promptText);
 		
 		bottomPromptText = new Alphabet(0, 0, "Press ESC to exit", true, false);
 		bottomPromptText.screenCenter();
-		bottomPromptText.y -= 150;
+		bottomPromptText.y = prompt.y - prompt.height;
 		changeKeyPrompt.add(bottomPromptText);
 
 		add(prompt);
@@ -409,18 +350,13 @@ class KeyBindState extends MusicBeatState
 			if (keyArray[i] == null)
 				keyArray[i] = '';
 
-			var keyText:Alphabet = new Alphabet(0, 0, keyArray[i] + ' - ' + (i > 3 ? uiKeyDir[i] : keyDir[i]), true, false);
+			var keyText:Alphabet = new Alphabet(0, 0, (i > 3 ? uiKeyDir[i] : keyDir[i]) + ' ' + keyArray[i], true, false);
 			keyText.screenCenter();
 			keyText.targetY = i;
+			keyText.isMenuItem = true;
 			keyText.alpha = 0.6;
 
 			keyOptions.add(keyText);
-		}
-
-		for (i in 0...keyOptions.length)
-		{
-			keyOptions.members[i].y = (70 * 1.1 * i) + 30 - 12.5;
-			keyOptions.members[i].x = keyOptions.members[i].x - 10;
 		}
 
 		keyOptions.members[curSelection].alpha = 1;
@@ -438,12 +374,14 @@ class KeyBindState extends MusicBeatState
 
 		if (curSelection < 0)
 			curSelection = keyOptions.length - 1;
-		else if (curSelection >= keyOptions.length)
+		
+		if (curSelection >= keyOptions.length)
 			curSelection = 0;
 			
 		for (i in 0...keyOptions.length)
 		{
 			keyOptions.members[i].alpha = 0.6;
+			keyOptions.members[i].targetY = i - curSelection;
 		}
 
 		keyOptions.members[curSelection].alpha = 1;
@@ -520,6 +458,7 @@ class KeyBindState extends MusicBeatState
 			}
 
 			controls.setKeyboardScheme(None, false);
+			PlayerController.playerControl.setKeyboardScheme(None, false);
 
 			resetAlphabet();
 
@@ -552,14 +491,17 @@ class KeyBindState extends MusicBeatState
 
 class OptionPrefs extends MusicBeatState
 {
-	var alphaOptions:FlxTypedGroup<Alphabet>;
+	public static var instance:OptionPrefs;
+	var alphaOptions:FlxTypedGroup<OptionPref>;
 	var options:Array<String> = [];
 	var optionsVars:Array<Bool> = [];
 	var curSelected:Int = 0;
 	var curOption:String = "";
+	var canMove:Bool = true;
 	
 	override function create()
 	{
+		instance = this;
 		transIn = FlxTransitionableState.defaultTransIn;
 		transOut = FlxTransitionableState.defaultTransOut;
 
@@ -575,35 +517,61 @@ class OptionPrefs extends MusicBeatState
 		alphaOptions = generateOptions();
 
 		changeSelection();
+
+		canMove = true;
 	}
 
-	private function generateOptions():FlxTypedGroup<Alphabet>
+	public function getOptions()
 	{
-		alphaOptions = new FlxTypedGroup<Alphabet>();
-
 		for (option in Main.gameSettings.gameSettingInfo.keys())
 		{
 			options.push(Main.gameSettings.gameSettingInfo.get(option)[0]);
 			optionsVars.push(Main.gameSettings.gameSettingInfo.get(option)[1]);
 		}
+	}
 
-		for (i in 0...options.length)
+	private function generateOptions():FlxTypedGroup<OptionPref>
+	{
+		alphaOptions = new FlxTypedGroup<OptionPref>();
+
+		var settingInfo:Array<Array<Dynamic>> = Main.gameSettings.settingsList;
+
+		var shit:Int = 0;
+
+		for (setting in settingInfo)
 		{
-			var optionText:Alphabet = new Alphabet(0, 0, options[i] + ' ' + optionsVars[i], true, false);
-			optionText.screenCenter();
-			optionText.targetY = i;
-			optionText.alpha = 0.6;
+			var isNumb:Bool = false;
+			var isString:Bool = false;
 
+			if (setting[2] == 'int' || setting[2] == 'float')
+				isNumb = true;
+
+			if (setting[2] == 'string')
+				isString = true;
+
+			var optionVariable:String = setting[1];
+
+			var optionText:OptionPref = new OptionPref(
+			0, 
+			0, 
+			optionVariable, 
+			setting[0], 
+			setting[2], 
+			getValue(optionVariable), 
+			'OptionPrefs', 
+			shit,
+			setting[3], 
+			(isNumb ? setting[4] : 0),
+			(isNumb ? setting[5] : 0), 
+			(isNumb ? setting[6] : 10), 
+			(isString ? setting[4] : null)); //Sorry for this lol
+
+			optionText.alphaText.alpha = 0.6;
 			alphaOptions.add(optionText);
+			shit++;
 		}
 
-		for (i in 0...alphaOptions.length)
-		{
-			alphaOptions.members[i].y = (70 * 1.1 * i) + 30 - 12.5;
-			alphaOptions.members[i].x = alphaOptions.members[i].x - 10;
-		}
-
-		alphaOptions.members[curSelected].alpha = 1;
+		alphaOptions.members[curSelected].alphaText.alpha = 1;
 
 		add(alphaOptions);
 
@@ -617,12 +585,169 @@ class OptionPrefs extends MusicBeatState
 		curSelected += change;
 
 		if (curSelected < 0)
-			curSelected = options.length - 1;
-		if (curSelected >= options.length)
+			curSelected = alphaOptions.length - 1;
+		if (curSelected >= alphaOptions.length)
+			curSelected = 0;
+
+		var bullShit:Int = 0;
+
+		for (item in alphaOptions.members)
+		{
+			item.targetY = bullShit - curSelected;
+			bullShit++;
+
+			item.alphaText.alpha = 0.6;
+
+			if (item.targetY == 0)
+				item.alphaText.alpha = 1;
+		}
+	}
+
+	override function update(elapsed:Float)
+	{
+		var upP = controls.UI_UP_P;
+		var downP = controls.UI_DOWN_P;
+		var accepted = controls.ACCEPT;
+
+		if (upP && canMove)
+			changeSelection(-1);
+
+		if (downP && canMove)
+			changeSelection(1);
+
+		if (controls.BACK && canMove)
+			ClassShit.switchState(new OptionsState());
+
+
+		switch (alphaOptions.members[curSelected].optionType)
+		{
+			case 'bool':
+				updateCheckbox();
+			case 'int' | 'float' | 'string':
+				updateSelector();
+		}
+
+		super.update(elapsed);
+	}
+
+	private function updateSelector()
+	{
+		var thePref:OptionPref = alphaOptions.members[curSelected];
+
+		if (controls.UI_LEFT_P){
+			switch (thePref.variableName)
+			{
+				case 'fpsCap':
+					thePref.onPressLeft(function(){
+						PlayerPrefs.setFramerate();
+					});
+				default:
+					thePref.onPressLeft();
+			}
+		}
+
+		if (controls.UI_RIGHT_P) {
+			switch (thePref.variableName)
+			{
+				case 'fpsCap':
+					thePref.onPressRight(function(){
+						PlayerPrefs.setFramerate();
+					});
+				default:
+					thePref.onPressRight();
+			}
+		}
+	}
+
+	private function updateCheckbox()
+	{
+		var thePref:OptionPref = alphaOptions.members[curSelected];
+
+		if (controls.ACCEPT){
+			switch (thePref.variableName)
+			{
+				case 'fpsCounter':
+					thePref.onPressEnter(function(isChecked:Bool){
+						Main.setFPSVisible();
+					});
+				default:
+					thePref.onPressEnter();
+			}
+		}
+	}
+
+	function getValue(variable):Dynamic
+		return Reflect.getProperty(PlayerPrefs, variable);
+}
+
+class ModPrefs extends MusicBeatState
+{
+	public static var instance:ModPrefs;
+	var alphaOptions:FlxTypedGroup<Alphabet>;
+	var options:Array<String> = [];
+	var optionsVars:Array<Bool> = [];
+	var curSelected:Int = 0;
+	var curOption:String = "";
+	var canMove:Bool = true;
+	
+	override function create()
+	{
+		instance = this;
+		transIn = FlxTransitionableState.defaultTransIn;
+		transOut = FlxTransitionableState.defaultTransOut;
+
+		var bg:FlxSprite = new FlxSprite(-80).loadGraphic(Paths.image('menuDesat'));
+		bg.scrollFactor.x = 0;
+		bg.scrollFactor.y = 0.18;
+		bg.setGraphicSize(Std.int(bg.width * 1.1));
+		bg.updateHitbox();
+		bg.screenCenter();
+		bg.antialiasing = true;
+		add(bg);
+
+		alphaOptions = generateOptions();
+
+		changeSelection();
+
+		canMove = true;
+	}
+
+	public function getOptions()
+	{
+		options.push("Not Done Yet");
+		optionsVars.push(false);
+	}
+
+	private function generateOptions():FlxTypedGroup<Alphabet>
+	{
+		alphaOptions = new FlxTypedGroup<Alphabet>();
+
+		getOptions();
+
+		var shit:Int = 0;
+
+		var alphabetText:Alphabet = new Alphabet(0, 0, 'Not Done Yet', true, false);
+		alphabetText.isMenuItem = true;
+		alphabetText.targetY = 0;
+		alphaOptions.add(alphabetText);
+
+		add(alphaOptions);
+
+		return alphaOptions;
+	}
+
+	function changeSelection(?change:Int = 0) //stolen from freeplay lmaoooo
+	{
+		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+
+		curSelected += change;
+
+		if (curSelected < 0)
+			curSelected = alphaOptions.length - 1;
+		if (curSelected >= alphaOptions.length)
 			curSelected = 0;
 
 		curOption = options[curSelected];
-
 		var bullShit:Int = 0;
 
 		for (item in alphaOptions.members)
@@ -646,77 +771,193 @@ class OptionPrefs extends MusicBeatState
 		var downP = controls.UI_DOWN_P;
 		var accepted = controls.ACCEPT;
 
-		if (upP)
+		if (upP && canMove)
 		{
 			changeSelection(-1);
 		}
-		if (downP)
+		if (downP && canMove)
 		{
 			changeSelection(1);
 		}
 
-		if (controls.BACK)
-				ClassShit.switchState(new OptionsState());
+		if (controls.BACK && canMove)
+			ClassShit.switchState(new OptionsState());
 
-		if (accepted)
+		if (accepted && canMove)
 		{
+			canMove = false;
+
 			FlxG.sound.play(Paths.sound('confirmMenu'));
 
 			FlxFlicker.flicker(alphaOptions.members[curSelected], 0.5, 0.12, true, false, function(flicker:FlxFlicker)
 			{
-				setVar();
+				//setVar();
+				canMove = true;
 			});
 		}
 
 		super.update(elapsed);
 	}
 
-	private function resetAlpha()
+	private function resetOptions()
 	{	
 		options = [];
 		optionsVars = [];
-		if (alphaOptions != null)
-		{
-			remove(alphaOptions);
 
-			alphaOptions = generateOptions();
-		}
+		getOptions();
 	}
 
 	function setVar()
 	{
 		switch (curOption)
 		{
-			case 'Downscroll':
-				FlxG.save.data.downscroll = !optionsVars[curSelected];
-				trace("Chosen Downscroll");
-			case 'Middlescroll':
-				FlxG.save.data.middlescroll = !optionsVars[curSelected];
-				trace("Chosen Middlescroll");
-			case 'FPS Counter':
-				FlxG.save.data.fpsCounter = !optionsVars[curSelected];
-				Main.setFPSVisible();
-				trace("Chosen Fps Counter");
-			case 'Ghost Tapping':
-				FlxG.save.data.ghostTapping = !optionsVars[curSelected];
-				trace("Chosen Ghost Tapping");
-			case 'Play Opponent Side':
-				FlxG.save.data.opponentSide = !optionsVars[curSelected];
-			case 'Show curState':
-				FlxG.save.data.showState = !optionsVars[curSelected];
-			case 'Game Auto Pause':
-				FlxG.save.data.autoPauseG = !optionsVars[curSelected];
-			case 'Botplay':
-				FlxG.save.data.botplay = !optionsVars[curSelected];
-			default:
-				if (Main.gameSettings.boolSettings.exists(curOption))
-					Main.gameSettings.boolSettings.set(curOption, !Main.gameSettings.getSettingBool(curOption));
-				else
-					Main.gameSettings.boolSettings.set(curOption, true);
+			case 'Not Done Yet':
+				trace('Not Done');
 		}
 
-		Main.gameSettings.saveSettings();
+		resetOptions();
+		Main.gameSettings.resetSettings();
+		trace('Chosen ' + curOption + ": " + optionsVars[curSelected]);
+	}
+}
 
-		resetAlpha();
+class NotePrefs extends MusicBeatState
+{
+	public static var instance:NotePrefs;
+	var alphaOptions:FlxTypedGroup<Alphabet>;
+	var options:Array<String> = [];
+	var optionsVars:Array<Bool> = [];
+	var curSelected:Int = 0;
+	var curOption:String = "";
+	var canMove:Bool = true;
+	
+	override function create()
+	{
+		instance = this;
+		transIn = FlxTransitionableState.defaultTransIn;
+		transOut = FlxTransitionableState.defaultTransOut;
+
+		var bg:FlxSprite = new FlxSprite(-80).loadGraphic(Paths.image('menuDesat'));
+		bg.scrollFactor.x = 0;
+		bg.scrollFactor.y = 0.18;
+		bg.setGraphicSize(Std.int(bg.width * 1.1));
+		bg.updateHitbox();
+		bg.screenCenter();
+		bg.antialiasing = true;
+		add(bg);
+
+		alphaOptions = generateOptions();
+
+		changeSelection();
+
+		canMove = true;
+	}
+
+	public function getOptions()
+	{
+		options.push("Not Done Yet");
+		optionsVars.push(false);
+	}
+
+	private function generateOptions():FlxTypedGroup<Alphabet>
+	{
+		alphaOptions = new FlxTypedGroup<Alphabet>();
+
+		getOptions();
+
+		var shit:Int = 0;
+
+		var alphabetText:Alphabet = new Alphabet(0, 0, 'Not Done Yet', true, false);
+		alphabetText.isMenuItem = true;
+		alphabetText.targetY = 0;
+		alphaOptions.add(alphabetText);
+
+		add(alphaOptions);
+
+		return alphaOptions;
+	}
+
+	function changeSelection(?change:Int = 0) //stolen from freeplay lmaoooo
+	{
+		FlxG.sound.play(Paths.sound('scrollMenu'), 0.4);
+
+		curSelected += change;
+
+		if (curSelected < 0)
+			curSelected = alphaOptions.length - 1;
+		if (curSelected >= alphaOptions.length)
+			curSelected = 0;
+
+		curOption = options[curSelected];
+		var bullShit:Int = 0;
+
+		for (item in alphaOptions.members)
+		{
+			item.targetY = bullShit - curSelected;
+			bullShit++;
+
+			item.alpha = 0.6;
+
+			if (item.targetY == 0)
+			{
+				item.alpha = 1;
+				//Sex
+			}
+		}
+	}
+
+	override function update(elapsed:Float)
+	{
+		var upP = controls.UI_UP_P;
+		var downP = controls.UI_DOWN_P;
+		var accepted = controls.ACCEPT;
+
+		if (upP && canMove)
+		{
+			changeSelection(-1);
+		}
+		if (downP && canMove)
+		{
+			changeSelection(1);
+		}
+
+		if (controls.BACK && canMove)
+			ClassShit.switchState(new OptionsState());
+
+		if (accepted && canMove)
+		{
+			canMove = false;
+
+			FlxG.sound.play(Paths.sound('confirmMenu'));
+
+			FlxFlicker.flicker(alphaOptions.members[curSelected], 0.5, 0.12, true, false, function(flicker:FlxFlicker)
+			{
+				//setVar();
+				canMove = true;
+			});
+		}
+
+		super.update(elapsed);
+	}
+
+	private function resetOptions()
+	{	
+		options = [];
+		optionsVars = [];
+
+		getOptions();
+	}
+
+	function setVar()
+	{
+		switch (curOption)
+		{
+			case 'Not Done Yet':
+				trace('Not Done');
+		}
+
+		resetOptions();
+		Main.gameSettings.resetSettings();
+		trace('Chosen ' + curOption + ": " + optionsVars[curSelected]);
 	}
 }

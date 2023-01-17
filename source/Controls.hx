@@ -18,7 +18,6 @@ enum abstract Action(String) to String from String
 	var LEFT = "left";
 	var RIGHT = "right";
 	var DOWN = "down";
-	var DODGE = "dodge";
 	var UP_P = "up-press";
 	var LEFT_P = "left-press";
 	var RIGHT_P = "right-press";
@@ -53,7 +52,6 @@ abstract Action(String) to String from String
 	var LEFT = "left";
 	var RIGHT = "right";
 	var DOWN = "down";
-	var DODGE = "dodge";
 	var UP_P = "up-press";
 	var LEFT_P = "left-press";
 	var RIGHT_P = "right-press";
@@ -99,7 +97,6 @@ enum Control
 	LEFT;
 	RIGHT;
 	DOWN;
-	DODGE;
 	UI_UP;
 	UI_LEFT;
 	UI_RIGHT;
@@ -129,7 +126,6 @@ class Controls extends FlxActionSet
 	var _left = new FlxActionDigital(Action.LEFT);
 	var _right = new FlxActionDigital(Action.RIGHT);
 	var _down = new FlxActionDigital(Action.DOWN);
-	var _dodge = new FlxActionDigital(Action.DODGE);
 	var _upP = new FlxActionDigital(Action.UP_P);
 	var _leftP = new FlxActionDigital(Action.LEFT_P);
 	var _rightP = new FlxActionDigital(Action.RIGHT_P);
@@ -184,11 +180,6 @@ class Controls extends FlxActionSet
 
 	inline function get_DOWN()
 		return _down.check();
-
-	public var DODGE(get, never):Bool;
-
-	inline function get_DODGE()
-		return _dodge.check();
 
 	public var UP_P(get, never):Bool;
 
@@ -324,7 +315,6 @@ class Controls extends FlxActionSet
 		add(_left);
 		add(_right);
 		add(_down);
-		add(_dodge);
 		add(_upP);
 		add(_leftP);
 		add(_rightP);
@@ -357,7 +347,6 @@ class Controls extends FlxActionSet
 		add(_left);
 		add(_right);
 		add(_down);
-		add(_dodge);
 		add(_upP);
 		add(_leftP);
 		add(_rightP);
@@ -428,7 +417,6 @@ class Controls extends FlxActionSet
 			case UI_DOWN: _ui_down;
 			case UI_UP: _ui_up;
 			case UI_RIGHT: _ui_right;
-			case DODGE: _dodge;
 			case ACCEPT: _accept;
 			case BACK: _back;
 			case PAUSE: _pause;
@@ -485,8 +473,6 @@ class Controls extends FlxActionSet
 				func(_ui_down, PRESSED);
 				func(_ui_downP, JUST_PRESSED);
 				func(_ui_downR, JUST_RELEASED);
-			case DODGE:
-				func(_dodge, PRESSED);
 			case ACCEPT:
 				func(_accept, JUST_PRESSED);
 			case BACK:
@@ -646,11 +632,14 @@ class Controls extends FlxActionSet
 		inline bindKeys(Control.UI_DOWN, [FlxKey.fromString(FlxG.save.data.uiDownBind), FlxKey.DOWN]);
 		inline bindKeys(Control.UI_LEFT, [FlxKey.fromString(FlxG.save.data.uiLeftBind), FlxKey.LEFT]);
 		inline bindKeys(Control.UI_RIGHT, [FlxKey.fromString(FlxG.save.data.uiRightBind), FlxKey.RIGHT]);
-		inline bindKeys(Control.DODGE, [FlxKey.fromString(FlxG.save.data.uiDodgeBind)]);
 		inline bindKeys(Control.ACCEPT, [SPACE, ENTER]);
 		inline bindKeys(Control.BACK, [BACKSPACE, ESCAPE]);
 		inline bindKeys(Control.PAUSE, [P, ENTER, ESCAPE]);
 		inline bindKeys(Control.RESET, [R]);
+
+		#if debug
+		inline bindKeys(Control.CHEAT, [5]);
+		#end
 	}
 
 	function removeKeyboard()
@@ -719,7 +708,6 @@ class Controls extends FlxActionSet
 			Control.DOWN => [DPAD_DOWN, LEFT_STICK_DIGITAL_DOWN],
 			Control.LEFT => [DPAD_LEFT, LEFT_STICK_DIGITAL_LEFT],
 			Control.RIGHT => [DPAD_RIGHT, LEFT_STICK_DIGITAL_RIGHT],
-			Control.DODGE => [B],
 			Control.PAUSE => [START],
 			Control.RESET => [Y]
 		]);
@@ -730,7 +718,6 @@ class Controls extends FlxActionSet
 			Control.BACK => [A],
 			Control.UP => [DPAD_UP, LEFT_STICK_DIGITAL_UP, RIGHT_STICK_DIGITAL_UP],
 			Control.DOWN => [DPAD_DOWN, LEFT_STICK_DIGITAL_DOWN, RIGHT_STICK_DIGITAL_DOWN],
-			Control.DODGE => [A],
 			Control.LEFT => [DPAD_LEFT, LEFT_STICK_DIGITAL_LEFT, RIGHT_STICK_DIGITAL_LEFT],
 			Control.RIGHT => [DPAD_RIGHT, LEFT_STICK_DIGITAL_RIGHT, RIGHT_STICK_DIGITAL_RIGHT],
 			Control.PAUSE => [START],

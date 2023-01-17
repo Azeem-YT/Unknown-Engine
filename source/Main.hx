@@ -21,7 +21,6 @@ class Main extends Sprite
 	var gameHeight:Int = 720; // Height of the game in pixels (might be less / more in actual pixels depending on your zoom).
 	var initialState:Class<FlxState> = TitleState; // The FlxState the game starts with.
 	var zoom:Float = -1; // If -1, zoom is automatically calculated to fit the window dimensions.
-	var framerate:Int = 60; // How many frames per second the game should run at.
 	var skipSplash:Bool = true; // Whether to skip the flixel splash screen that appears in release mode.
 	var startFullscreen:Bool = false;
 	public static var gameSettings:GameSettings;
@@ -80,11 +79,16 @@ class Main extends Sprite
 		initialState = TitleState;
 		#end
 
-		addChild(new FlxGame(gameWidth, gameHeight, initialState, zoom, framerate, framerate, skipSplash, startFullscreen));
+		addChild(new FlxGame(gameWidth, gameHeight, initialState, zoom, 60, 60, skipSplash, startFullscreen));
 		
 		gameSettings = new GameSettings();
 
 		trace("Starting...");
+	}
+
+	private override function __update(transformOnly:Bool, updateChildren:Bool)
+	{
+		super.__update(transformOnly, updateChildren); //If you wanna update something in Main.
 	}
 
 	public static function setFramerateCap(cap:Float)
@@ -111,7 +115,8 @@ class Main extends Sprite
 
 	public static function setFPSVisible()
 	{
-		framerateCounter.visible = FlxG.save.data.fpsCounter;
+		if (framerateCounter != null)
+			framerateCounter.visible = PlayerPrefs.fpsCounter;
 	}
 
 	public function gameCrashed(errorMsg:UncaughtErrorEvent)

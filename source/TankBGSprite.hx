@@ -56,7 +56,10 @@ class TankBGSprite extends FlxSprite
 					loadGraphic(Paths.getImage(image));
 				else
 				#end
-					loadGraphic(Paths.image(image));
+					if (PlayState.instance.libraryToUse != null)
+						loadGraphic(Paths.image(image, PlayState.instance.libraryToUse));
+					else
+						loadGraphic(Paths.image(image));
 			}
 
 			active = false;
@@ -66,7 +69,7 @@ class TankBGSprite extends FlxSprite
 		antialiasing = true;
 	}
 
-	public function defaultDance() //lol funni
+	public function dance()
 	{
 		if (defaultAnim != null)
 			animation.play(defaultAnim);

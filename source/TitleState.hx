@@ -39,6 +39,7 @@ class TitleState extends MusicBeatState
 	var credTextShit:Alphabet;
 	var textGroup:FlxGroup;
 	var ngSpr:FlxSprite;
+	var gfLoaded:Bool;
 
 	var curWacky:Array<String> = [];
 
@@ -52,22 +53,13 @@ class TitleState extends MusicBeatState
 
 		FlxG.save.bind('funkin', 'ninjamuffin99');
 
-		PlayerSettings.init();
+		PlayerController.init();
 		SaveData.checkKeybinds();
 		SaveData.checkVars();
-
-		FlxG.autoPause = FlxG.save.data.autoPauseG;
+		PlayerPrefs.resetPrefs();
 
 		Main.getFPSCounter();
 		Main.setFPSVisible();
-		
-		if (FlxG.save.data.fpsR != null)
-		{
-			Main.fpsCap = FlxG.save.data.fpsR;
-			Main.setFramerateCap(Main.fpsCap);
-		}
-		else
-			Main.setFramerateCap(144.0);
 
 		curWacky = FlxG.random.getObject(getIntroTextShit());
 
@@ -155,6 +147,7 @@ class TitleState extends MusicBeatState
 		gfDance.animation.addByIndices('danceRight', 'gfDance', [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29], "", 24, false);
 		gfDance.antialiasing = true;
 		add(gfDance);
+		gfLoaded = true;
 		add(logoBl);
 
 		titleText = new FlxSprite(100, FlxG.height * 0.8);
@@ -264,7 +257,8 @@ class TitleState extends MusicBeatState
 
 		if (pressedEnter && !transitioning && skippedIntro)
 		{
-			titleText.animation.play('press');
+			if (titleText != null)
+				titleText.animation.play('press');
 
 			FlxG.camera.flash(FlxColor.WHITE, 1);
 			FlxG.sound.play(Paths.sound('confirmMenu'), 0.7);
@@ -274,6 +268,7 @@ class TitleState extends MusicBeatState
 
 			new FlxTimer().start(2, function(tmr:FlxTimer)
 			{			
+				Main.gameSettings.resetSettings();
 				ClassShit.switchState(new MainMenuState());
 			});
 			// FlxG.sound.play(Paths.music('titleShoot'), 0.7);
@@ -321,13 +316,17 @@ class TitleState extends MusicBeatState
 	{
 		super.beatHit();
 
-		logoBl.animation.play('bump');
+		if (logoBl != null)
+			logoBl.animation.play('bump');
 		danceLeft = !danceLeft;
 
-		if (danceLeft)
-			gfDance.animation.play('danceRight');
-		else
-			gfDance.animation.play('danceLeft');
+		if (gfDance != null)
+		{
+			if (danceLeft)
+				gfDance.animation.play('danceRight');
+			else
+				gfDance.animation.play('danceLeft');
+		}
 
 		FlxG.log.add(curBeat);
 

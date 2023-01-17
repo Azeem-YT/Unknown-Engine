@@ -14,7 +14,7 @@ class CheckBox extends FlxSprite
 		antialiasing = true;
 
 		animation.addByPrefix('false-finished', 'Check Box unselected');
-		animation.addByIndices('false', 'uncheck', [10, 9, 8, 7, 6, 5, 4, 3, 2, 1], "", 12, false);
+		animation.addByIndices('false', 'Check Box selecting animation', [10, 9, 8, 7, 6, 5, 4, 3, 2, 1], "", 12, false);
 		animation.addByPrefix('true-finished', 'Check Box Selected Static');
 		animation.addByIndices('true', 'Check Box selecting animation', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "", 12, false);
 

@@ -27,6 +27,7 @@ typedef CharData =
 	var scale:Float;
 	var healthIcon:String;
 	var animatedIcon:Bool;
+	var idleOnBeat:Int;
 	var animations:Array<AnimData>;
 	var positionOffset:Array<Float>;
 	var iconAnims:Array<String>;
@@ -79,6 +80,8 @@ class Character extends FlxSprite
 	public var camOffset:Array<Float> = [0,0];
 	public var animationNotes:Array<Dynamic> = [];
 	public var positionOffset:Array<Float>;
+	public var canSing:Bool = true;
+	public var idleOnBeat:Int = 2;
 
 	public var healthIcon:String;
 
@@ -101,9 +104,9 @@ class Character extends FlxSprite
 		super(x, y);
 
 		animOffsets = new Map<String, Array<Dynamic>>();
-		animOffsets.clear();
 		curCharacter = character;
 		this.isPlayer = isPlayer;
+		resetVars();
 
 		var tex:FlxAtlasFrames;
 		antialiasing = true;
@@ -138,6 +141,7 @@ class Character extends FlxSprite
 				addOffset('hairFall', 0, -9);
 
 				addOffset('scared', -2, -17);
+				idleOnBeat = 1;
 
 				playAnim('danceRight');
 
@@ -151,6 +155,8 @@ class Character extends FlxSprite
 
 				addOffset('danceLeft', 0);
 				addOffset('danceRight', 0);
+
+				idleOnBeat = 1;
 
 				playAnim('danceRight');
 
@@ -169,6 +175,7 @@ class Character extends FlxSprite
 				setGraphicSize(Std.int(width * PlayState.daPixelZoom));
 				updateHitbox();
 				antialiasing = false;
+				idleOnBeat = 1;
 
 			case "gf-tankmen":
 				tex = Paths.getSparrowAtlas("characters/gfTankmen", "shared");
@@ -182,6 +189,7 @@ class Character extends FlxSprite
 				addOffset("danceRight", 0, -9);
 				
 				playAnim("danceRight");
+				idleOnBeat = 1;
 			case 'spooky':
 				tex = Paths.getSparrowAtlas('spooky_kids_assets', 'week2');
 				frames = tex;
@@ -673,6 +681,8 @@ class Character extends FlxSprite
 						antialiasing = false;
 					else
 						antialiasing = true;
+
+					idleOnBeat = data.idleOnBeat;
 				}
 				else
 				{
@@ -898,8 +908,32 @@ class Character extends FlxSprite
 		animationNotes.sort(noteSort);
 	}
 
+	public function setCanSing(value:Bool){ //Don't rlly need it but module can't find it so...
+		canSing = value;
+	}
+
 	public function noteSort(Obj1:Array<Dynamic>, Obj2:Array<Dynamic>):Int
 	{
 		return FlxSort.byValues(FlxSort.ASCENDING, Obj1[0], Obj2[0]);
+	}
+
+	public function resetVars()
+	{
+		camOffset = [0,0];
+		animationNotes = [];
+		positionOffset = [0, 0];
+		healthIconIsAnimated = false;
+		healthIconAnim = [];
+		healthIconLooped = false;
+		iconScale = 1;
+		portraitArray = [];
+		portraitEnter = null;
+		deathCharacter = 'bf';
+		deathSound = null;
+		idleDance = 'idle';
+		healthIcon = null;
+		idleOnBeat = 2;
+		canSing = true;
+		animOffsets.clear();
 	}
 }

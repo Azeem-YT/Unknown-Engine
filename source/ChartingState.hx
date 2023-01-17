@@ -361,6 +361,7 @@ class ChartingState extends MusicBeatState
 		});
 
 		player1DropDown.selectedLabel = _song.player1;
+		player1DropDown.dropDirection = FlxUIDropDownMenuDropDirection.Down;
 
 		var player2DropDown = new FlxUIDropDownMenu(140, 100, FlxUIDropDownMenu.makeStrIdLabelArray(allChars, true), function(character:String)
 		{
@@ -368,6 +369,7 @@ class ChartingState extends MusicBeatState
 		});
 
 		player2DropDown.selectedLabel = _song.player2;
+		player2DropDown.dropDirection = FlxUIDropDownMenuDropDirection.Down;
 
 		var gfVersionDropDown = new FlxUIDropDownMenu(10, 150, FlxUIDropDownMenu.makeStrIdLabelArray(allChars, true), function(character:String)
 		{
@@ -375,6 +377,7 @@ class ChartingState extends MusicBeatState
 		});
 
 		gfVersionDropDown.selectedLabel = _song.gfVersion;
+		gfVersionDropDown.dropDirection = FlxUIDropDownMenuDropDirection.Down;
 
 		var playerNoteTexDropDown = new FlxUIDropDownMenu(140, 150, FlxUIDropDownMenu.makeStrIdLabelArray(noteTexVer, true), function(noteTex:String)
 		{
@@ -382,6 +385,7 @@ class ChartingState extends MusicBeatState
 		});
 
 		playerNoteTexDropDown.selectedLabel = _song.notePlayerTexture;
+		playerNoteTexDropDown.dropDirection = FlxUIDropDownMenuDropDirection.Down;
 
 		var noteOpponentTexDropDown = new FlxUIDropDownMenu(140, 200, FlxUIDropDownMenu.makeStrIdLabelArray(noteTexVer, true), function(noteTex:String)
 		{
@@ -395,7 +399,8 @@ class ChartingState extends MusicBeatState
 			_song.stage = stageList[Std.parseInt(stage)];
 		});
 
-		stageDropDown.selectedLabel = _song.stage;
+		playerNoteTexDropDown.selectedLabel = _song.stage;
+		playerNoteTexDropDown.dropDirection = FlxUIDropDownMenuDropDirection.Down;
 
 		var tab_group_song = new FlxUI(null, UI_box);
 		tab_group_song.name = "Song";
@@ -420,6 +425,7 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(stageDropDown);
 
 		UI_box.addGroup(tab_group_song);
+		//FlxUIDropDownMenuDropDirection
 		UI_box.scrollFactor.set();
 
 		FlxG.camera.follow(strumLine);

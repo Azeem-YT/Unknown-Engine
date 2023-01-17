@@ -1,66 +1,23 @@
 package optionHelpers;
 
-import flixel.FlxG;
 import haxe.ds.StringMap;
 import flixel.input.keyboard.FlxKey;
+import flixel.*;
 
 using StringTools;
-
-enum SettingTypes
-{
-	Int;
-	Checkmark;
-	Bool;
-	Float;
-	String;
-}
 
 class GameSettings
 {
 	public var stringSettings:StringMap<String>;
+	public var floatSettings:StringMap<Float>;
+	public var intSettings:StringMap<Int>;
 	public var boolSettings:Map<String, Bool>;
 
 	public var keybinds:StringMap<Dynamic>;
 	public var keybindArray:Array<String> = [FlxG.save.data.leftBind, FlxG.save.data.downBind, FlxG.save.data.upBind, FlxG.save.data.rightBind, FlxG.save.data.uiLeftBind, FlxG.save.data.uiDownBind, FlxG.save.data.uiUpBind, FlxG.save.data.uiRightBind];
 	public var keyBlacklist:Array<String> = ["ENTER", "ESCAPE", "BACKSPACE"];
-	public var gameSettingInfo:Map<String, Dynamic> = [
-		'Botplay' => [
-			'Botplay',
-			FlxG.save.data.botplay,
-			Checkmark,
-			''
-		],
-		'Ghost Tapping' => [
-			'Ghost Tapping',
-			FlxG.save.data.ghostTapping,
-			Checkmark,
-			'If Checked, Ghost Tapping allowing you to press inputs without missing.'
-		],
-		'FPS Counter' => [
-			'FPS Counter',
-			FlxG.save.data.fpsCounter,
-			Checkmark,
-			'If Checked, an Fps Counter will apear on the top left of the game.'
-		],
-		'Middlescroll' => [
-			'Middlescroll',
-			FlxG.save.data.middlescroll,
-			Checkmark,
-			'If Checked, the strumline will be on the middle of the screen.'
-		],
-		'Downscroll' => [
-			'Downscroll',
-			FlxG.save.data.downscroll,
-			Checkmark,
-			'If Checked, the strumline will be flipped vertically.'
-		],
-		'Game Auto Pause' => [
-			'Game Auto Pause',
-			FlxG.save.data.autoPauseG,
-			Checkmark,
-			'If Checked, the game will pause when clicked off window.'
-		]
-	];
+	public var gameSettingInfo:Map<String, Dynamic> = [];
+	public var settingsList:Array<Array<Dynamic>> = [];
 
 	public var trueSettings:Map<String, Dynamic> = [];
 
@@ -72,107 +29,144 @@ class GameSettings
 	public function init()
 	{
 		stringSettings = new StringMap<String>();
+		floatSettings = new StringMap<Float>();
+		intSettings = new StringMap<Int>();
 		boolSettings = new Map<String, Bool>();
 		keybinds = new StringMap<Dynamic>();
 
-		boolSettings.set("Downscroll", FlxG.save.data.downscroll);
-		boolSettings.set("Middlescroll", FlxG.save.data.middlescroll);
-		boolSettings.set("Ghost Tapping", FlxG.save.data.ghostTapping);
-		boolSettings.set("FPS Counter", FlxG.save.data.fpsCounter);
-		boolSettings.set("Play Opponent Side", FlxG.save.data.opponentSide);
-		boolSettings.set("Game Auto Pause", FlxG.save.data.autoPauseG);
-		boolSettings.set("Botplay", FlxG.save.data.botplay);
+		if (!PlayerPrefs.loadedPrefs)
+			PlayerPrefs.resetPrefs();
+
+		resetSettings();
+	}
+
+	public function resetSettings()
+	{
+		gameSettingInfo = [
+			'Time Bar Type' => [
+				'Time Bar Type',
+				'timeType',
+				'string',
+				'Time Elapsed',
+				[
+					'Time Elapsed',
+					'Song Name'
+				]
+			],
+		];
+
+		settingsList = [
+			[
+				'Botplay',
+				'botplay',
+				'bool',
+				false
+			],
+			[
+				'Cam Zooming',
+				'camCanZoom',
+				'bool',
+				true,
+			],
+			[
+				'Downscroll',
+				'downscroll',
+				'bool',
+				false
+			],
+			[
+				'FPS Counter',
+				'fpsCounter',
+				'bool',
+				true
+			],
+			[
+				'Framerate Cap',
+				'fpsCap',
+				'float',
+				60.0,
+				30.0,
+				300.0,
+				10
+			],
+			[
+				'Game Hud Transparence',
+				'hudAlpha',
+				'float',
+				1,
+				0.5,
+				1,
+				0.1
+			],
+			[
+				'Ghost Tapping',
+				'ghostTapping',
+				'bool',
+				true
+			],
+			[
+				'Health Bar Transparence',
+				'healthAlpha',
+				'float',
+				1,
+				0,
+				1,
+				0.1
+			],
+			[
+				'Middlescroll',
+				'middlescroll',
+				'bool',
+				false,
+			],
+			[
+				'Time Bar Type',
+				'timeType',
+				'string',
+				'Time Elapsed',
+				[
+					'Time Elapsed',
+					'Song Name'
+				]
+			],
+		];
+
+		for (settingShit in settingsList)
+		{
+			var optionType:String = settingShit[2];
+			var optionName:String = settingShit[0];
+			var optionVar:Dynamic = Reflect.getProperty(PlayerPrefs, settingShit[1]);
+
+			switch (optionType)
+			{
+				case 'bool':
+					boolSettings.set(optionName, optionVar);
+				case 'string':
+					stringSettings.set(optionName, optionVar);
+				case 'float':
+					floatSettings.set(optionName, optionVar);
+				case 'int':
+					intSettings.set(optionName, optionVar);
+			}
+		}
+
 		keybinds.set("LeftBind", FlxG.save.data.leftBind);
 		keybinds.set("DownBind", FlxG.save.data.downBind);
 		keybinds.set("UpBind", FlxG.save.data.upBind);
 		keybinds.set("RightBind", FlxG.save.data.rightBind);
 		keybinds.set("SpaceBind", FlxG.save.data.dodgeBind);
 
-		for (shit in gameSettingInfo.keys())
-		{
-			if (gameSettingInfo.get(shit) == SettingTypes.Checkmark)
-				trueSettings.set(gameSettingInfo.get(shit), gameSettingInfo.get(shit)[0]);
-		}
-
-		if (FlxG.save.data.saveSettings == null)
-			FlxG.save.data.saveSettings = trueSettings;
-		else
-			trueSettings = FlxG.save.data.saveSettings;
+		PlayerPrefs.savePrefs();
 	}
 
 	public function saveSettings()
 	{
-		gameSettingInfo = [
-			'Botplay' => [
-				'Botplay',
-				FlxG.save.data.botplay,
-				Checkmark,
-				''
-			],
-			'Ghost Tapping' => [
-				'Ghost Tapping',
-				FlxG.save.data.ghostTapping,
-				Checkmark,
-				'If Checked, Ghost Tapping allowing you to press inputs without missing.'
-			],
-			'FPS Counter' => [
-				'FPS Counter',
-				FlxG.save.data.fpsCounter,
-				Checkmark,
-				'If Checked, an Fps Counter will apear on the top left of the game.'
-			],
-			'Middlescroll' => [
-				'Middlescroll',
-				FlxG.save.data.middlescroll,
-				Checkmark,
-				'If Checked, the strumline will be on the middle of the screen.'
-			],
-			'Downscroll' => [
-				'Downscroll',
-				FlxG.save.data.downscroll,
-				Checkmark,
-				'If Checked, the strumline will be flipped vertically.'
-			],
-			'Game Auto Pause' => [
-				'Game Auto Pause',
-				FlxG.save.data.autoPauseG,
-				Checkmark,
-				'If Checked, the game will pause when clicked off window.'
-			]
-		];
+		FlxG.save.data.boolSettings = boolSettings;
+		FlxG.save.data.stringSettings = stringSettings;
+		FlxG.save.data.intSettings = intSettings;
+		FlxG.save.data.floatSettings = floatSettings;
 
-		FlxG.save.data.saveSettings = trueSettings;
-
-		var stringSetting:Array<String> = [];
-
-		for (lel in stringSettings.keys())
-		{
-			stringSetting.push(stringSettings.get(lel));
-		}
-
-		FlxG.save.data.stringSettings = stringSetting;
-
-		var boolSetting:Array<Bool> = [];
-		
-		for (lel in boolSettings.keys())
-		{
-			boolSetting.push(boolSettings.get(lel));
-		}
-
-		FlxG.save.data.boolSettings = boolSetting;
-
-		boolSettings.set("Downscroll", FlxG.save.data.downscroll);
-		boolSettings.set("Middlescroll", FlxG.save.data.middlescroll);
-		boolSettings.set("Ghost Tapping", FlxG.save.data.ghostTapping);
-		boolSettings.set("FPS Counter", FlxG.save.data.fpsCounter);
-		boolSettings.set("Play Opponent Side", FlxG.save.data.opponentSide);
-		boolSettings.set("Game Auto Pause", FlxG.save.data.autoPauseG);
-		boolSettings.set("Botplay", FlxG.save.data.botplay);
-		keybinds.set("LeftBind", FlxG.save.data.leftBind);
-		keybinds.set("DownBind", FlxG.save.data.downBind);
-		keybinds.set("UpBind", FlxG.save.data.upBind);
-		keybinds.set("RightBind", FlxG.save.data.rightBind);
-		keybinds.set("SpaceBind", FlxG.save.data.dodgeBind);
+		resetSettings();
 	}
 
 	public function getSettingBool(variable:String):Bool
@@ -184,6 +178,39 @@ class GameSettings
 		}
 
 		return true;
+	}
+
+	public function getSettingFloat(variable:String):Float
+	{
+		if (floatSettings.exists(variable))
+		{
+			var returnVal:Float = floatSettings.get(variable);
+			return returnVal;
+		}
+
+		return 0.0;
+	}
+
+	public function getSettingInt(variable:String):Int
+	{
+		if (intSettings.exists(variable))
+		{
+			var returnVal:Int = intSettings.get(variable);
+			return returnVal;
+		}
+
+		return 0;
+	}
+
+	public function getSettingString(variable:String):String
+	{
+		if (stringSettings.exists(variable))
+		{
+			var returnVal:String = stringSettings.get(variable);
+			return returnVal;
+		}
+
+		return '';
 	}
 
 	public function getKeyBind(direction:String):String
@@ -204,6 +231,31 @@ class GameSettings
 				daKey = keybinds.get('RightBind');
 			case 'space' | 'dodge':
 				daKey = keybinds.get('SpaceBind');
+		}
+
+		return daKey;
+	}
+
+	public function getBindKey(direction:String):FlxKey
+	{
+		direction = direction.toLowerCase();
+
+		var daKey:FlxKey = 32;
+
+		switch (direction)
+		{
+			case 'left':
+				daKey = FlxKey.fromString(keybinds.get('LeftBind'));
+			case 'down':
+				daKey = FlxKey.fromString(keybinds.get('DownBind'));
+			case 'up':
+				daKey = FlxKey.fromString(keybinds.get('UpBind'));
+			case 'right':
+				daKey = FlxKey.fromString(keybinds.get('RightBind'));
+			case 'space' | 'dodge':
+				daKey = FlxKey.fromString(keybinds.get('SpaceBind'));
+			default:
+				daKey = FlxKey.fromString('SPACE');
 		}
 
 		return daKey;
