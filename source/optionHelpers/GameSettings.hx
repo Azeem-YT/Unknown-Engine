@@ -18,6 +18,8 @@ class GameSettings
 	public var keyBlacklist:Array<String> = ["ENTER", "ESCAPE", "BACKSPACE"];
 	public var gameSettingInfo:Map<String, Dynamic> = [];
 	public var settingsList:Array<Array<Dynamic>> = [];
+	public var noteSettings:Array<Array<Dynamic>> = [];
+	public var graphicsSettings:Array<Array<Dynamic>> = [];
 
 	public var trueSettings:Map<String, Dynamic> = [];
 
@@ -42,114 +44,6 @@ class GameSettings
 
 	public function resetSettings()
 	{
-		gameSettingInfo = [
-			'Time Bar Type' => [
-				'Time Bar Type',
-				'timeType',
-				'string',
-				'Time Elapsed',
-				[
-					'Time Elapsed',
-					'Song Name'
-				]
-			],
-		];
-
-		settingsList = [
-			[
-				'Botplay',
-				'botplay',
-				'bool',
-				false
-			],
-			[
-				'Cam Zooming',
-				'camCanZoom',
-				'bool',
-				true,
-			],
-			[
-				'Downscroll',
-				'downscroll',
-				'bool',
-				false
-			],
-			[
-				'FPS Counter',
-				'fpsCounter',
-				'bool',
-				true
-			],
-			[
-				'Framerate Cap',
-				'fpsCap',
-				'float',
-				60.0,
-				30.0,
-				300.0,
-				10
-			],
-			[
-				'Game Hud Transparence',
-				'hudAlpha',
-				'float',
-				1,
-				0.5,
-				1,
-				0.1
-			],
-			[
-				'Ghost Tapping',
-				'ghostTapping',
-				'bool',
-				true
-			],
-			[
-				'Health Bar Transparence',
-				'healthAlpha',
-				'float',
-				1,
-				0,
-				1,
-				0.1
-			],
-			[
-				'Middlescroll',
-				'middlescroll',
-				'bool',
-				false,
-			],
-			[
-				'Time Bar Type',
-				'timeType',
-				'string',
-				'Time Elapsed',
-				[
-					'Time Elapsed',
-					'Song Name'
-				]
-			],
-		];
-
-		for (settingShit in settingsList)
-		{
-			var optionType:String = settingShit[2];
-			var optionName:String = settingShit[0];
-			var optionVar:Dynamic = Reflect.getProperty(PlayerPrefs, settingShit[1]);
-
-			switch (optionType)
-			{
-				case 'bool':
-					boolSettings.set(optionName, optionVar);
-				case 'string':
-					stringSettings.set(optionName, optionVar);
-				case 'float':
-					floatSettings.set(optionName, optionVar);
-				case 'int':
-					intSettings.set(optionName, optionVar);
-			}
-		}
-
 		keybinds.set("LeftBind", FlxG.save.data.leftBind);
 		keybinds.set("DownBind", FlxG.save.data.downBind);
 		keybinds.set("UpBind", FlxG.save.data.upBind);
@@ -167,50 +61,6 @@ class GameSettings
 		FlxG.save.data.floatSettings = floatSettings;
 
 		resetSettings();
-	}
-
-	public function getSettingBool(variable:String):Bool
-	{
-		if (boolSettings.exists(variable))
-		{
-			var daBool:Bool = boolSettings.get(variable);
-			return daBool;
-		}
-
-		return true;
-	}
-
-	public function getSettingFloat(variable:String):Float
-	{
-		if (floatSettings.exists(variable))
-		{
-			var returnVal:Float = floatSettings.get(variable);
-			return returnVal;
-		}
-
-		return 0.0;
-	}
-
-	public function getSettingInt(variable:String):Int
-	{
-		if (intSettings.exists(variable))
-		{
-			var returnVal:Int = intSettings.get(variable);
-			return returnVal;
-		}
-
-		return 0;
-	}
-
-	public function getSettingString(variable:String):String
-	{
-		if (stringSettings.exists(variable))
-		{
-			var returnVal:String = stringSettings.get(variable);
-			return returnVal;
-		}
-
-		return '';
 	}
 
 	public function getKeyBind(direction:String):String

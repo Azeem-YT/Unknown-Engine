@@ -1,0 +1,36 @@
+{
+	"useFrames": false,
+	"splashTexture": "noteSplashes",
+	"splashAnims": [
+		{
+			"prefix": "purple",
+			"anim": "note impact split purple",
+			"frames": 24,
+			"hasRandom": true,
+			"splashFrames": null
+		},
+		{
+			"prefix": "blue",
+			"anim": "note impact split blue",
+			"frames": 24,
+			"hasRandom": true,
+			"splashFrames": null
+		},
+		{
+			"prefix": "green",
+			"anim": "note impact split green",
+			"frames": 24,
+			"hasRandom": true,
+			"splashFrames": null
+		},
+		{
+			"prefix": "red",
+			"anim": "note impact split red",
+			"frames": 24,
+			"hasRandom": true,
+			"splashFrames": null
+		}
+	],
+	"xOffset": 10,
+	"yOffset": 10
+}

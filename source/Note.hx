@@ -40,6 +40,11 @@ class Note extends FlxSprite
 	public var prevNote:Note;
 	public var ignoreNote = false;
 	public var rating:String = "sick";
+	public var strumID:Int = 0;
+	public var sustainHit:Bool = false;
+	public var notePos:Int = 0;
+	public var canGhost:Bool = false;
+	public var noteHit:Bool = true;
 
 	public var sustainLength:Float = 0;
 	public var isSustainNote:Bool = false;
@@ -57,12 +62,12 @@ class Note extends FlxSprite
 
 	var playerStyle:String;
 	var opponentStyle:String;
-	public var curStyle:String;
+	public var curStyle:String = 'normal';
 	public var isPlayer:Bool = false;
 	public static var noteSkinPath:String = "NOTE_assets";
 
 	//Module Stuff
-	public var noteTypePath:String = "NOTE_assets";
+	public var noteTypePath:String = "";
 	public var noteXOffset:Float = 0;
 	public var noteYOffset:Float = 0;
 	public var healthGain:Float = 0.04;
@@ -77,10 +82,12 @@ class Note extends FlxSprite
 	public var noteTypeSet:Bool = false;
 	public var modifiedPos:Bool = false;
 	public var modifiedX:Float = 0;
+	public var playerLane:Int = 1;
+	public var strumLane:Int = 0;
 
 	function set_noteType(daNoteType:String)
 	{
-		if (daNoteType != "" && daNoteType != null && daNoteType != 'none')
+		if (daNoteType != "" && daNoteType != null && (daNoteType != 'none' || daNoteType != 'normal'))
 		{
 			switch (daNoteType)
 			{
@@ -102,7 +109,7 @@ class Note extends FlxSprite
 		return daNoteType;
 	}
 
-	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false, ?isPlayer:Bool, noteType:String = 'none', ?inCharter:Bool = false)
+	public function new(strumTime:Float, noteData:Int, ?prevNote:Note, ?sustainNote:Bool = false, ?isPlayer:Bool, noteType:String = 'none', ?inCharter:Bool = false, ?strumID:Int = 0)
 	{
 		super();
 
@@ -111,7 +118,10 @@ class Note extends FlxSprite
 
 		this.prevNote = prevNote;
 		isSustainNote = sustainNote;
-		this.isPlayer = isPlayer;
+		this.strumID = strumID;
+		this.isPlayer = (this.strumID == playerLane);
+		strumLane = this.strumID + 1;
+		this.mustPress = isPlayer;
 		this.inCharter = inCharter;
 
 		if (noteType != null && noteType != "none" && noteType != "")
@@ -133,12 +143,10 @@ class Note extends FlxSprite
 
 		var daStage:String = PlayState.curStage;
 
-		if (PlayState.dadNoteStyle != null && !isPlayer)
+		if (PlayState.dadNoteStyle != null && !(this.strumID == playerLane))
 			curStyle = PlayState.dadNoteStyle;
-		else if (PlayState.bfNoteStyle != null && isPlayer)
+		else if (PlayState.bfNoteStyle != null && (this.strumID == playerLane))
 			curStyle = PlayState.bfNoteStyle;
-		else
-			curStyle = 'normal';
 
 		set_noteType(noteType);
 
@@ -160,9 +168,9 @@ class Note extends FlxSprite
 
 	function loadDefaultNote()
 	{
-		if (isPlayer)
+		if (strumID == playerLane)
 		{
-			switch (curStyle)
+			switch (curStyle.toLowerCase())
 			{
 				case 'pixel':
 					loadGraphic(Paths.image('weeb/pixelUI/arrows-pixels', 'week6'), true, 17, 17);
@@ -188,15 +196,12 @@ class Note extends FlxSprite
 					}
 
 					setGraphicSize(Std.int(width * PlayState.daPixelZoom));
+					antialiasing = false;
 					updateHitbox();
 				case 'normal':	
-					#if desktop
-					frames = Paths.getModSparrowAtlas('noteSkins/' + PlayState.SONG.notePlayerTexture);
-					if (frames == null)
-					#end
-						frames = Paths.getSparrowAtlas('noteSkins/' + PlayState.SONG.notePlayerTexture);
-
-					if (frames == null)
+					if (PlayState.strumLines.members[strumID] != null && PlayState.strumLines.members[strumID].strums.members[noteData] != null)
+						frames = PlayState.strumLines.members[strumID].strums.members[noteData].frames;
+					else
 						frames = Paths.getSparrowAtlas("noteSkins/" + noteSkinPath, "shared");
 
 					animation.addByPrefix('greenScroll', 'green instance 1');
@@ -216,15 +221,11 @@ class Note extends FlxSprite
 
 					setGraphicSize(Std.int(width * 0.7));
 					updateHitbox();
-					antialiasing = FlxG.save.data.antialiasing;
+					antialiasing = PlayerPrefs.antialiasing;
 				default:
-					#if desktop
-					frames = Paths.getModSparrowAtlas('noteSkins/' + PlayState.SONG.notePlayerTexture);
-					if (frames == null)
-					#end
-						frames = Paths.getSparrowAtlas('noteSkins/' + PlayState.SONG.notePlayerTexture);
-
-					if (frames == null)
+					if (PlayState.strumLines.members[strumID] != null && PlayState.strumLines.members[strumID].strums.members[noteData] != null)
+						frames = PlayState.strumLines.members[strumID].strums.members[noteData].frames;
+					else
 						frames = Paths.getSparrowAtlas("noteSkins/" + noteSkinPath, "shared");
 
 					animation.addByPrefix('greenScroll', 'green instance 1');
@@ -244,7 +245,7 @@ class Note extends FlxSprite
 
 					setGraphicSize(Std.int(width * 0.7));
 					updateHitbox();
-					antialiasing = FlxG.save.data.antialiasing;
+					antialiasing = PlayerPrefs.antialiasing;
 			}
 		}
 		else
@@ -277,13 +278,9 @@ class Note extends FlxSprite
 					setGraphicSize(Std.int(width * PlayState.daPixelZoom));
 					updateHitbox();
 				case 'normal':
-					#if desktop
-					frames = Paths.getModSparrowAtlas('noteSkins/' + PlayState.SONG.noteOpponentTexture);
-					if (frames == null)
-					#end
-						frames = Paths.getSparrowAtlas('noteSkins/' + PlayState.SONG.noteOpponentTexture);
-
-					if (frames == null)
+					if (PlayState.strumLines.members[strumID] != null && PlayState.strumLines.members[strumID].strums.members[noteData] != null)
+						frames = PlayState.strumLines.members[strumID].strums.members[noteData].frames;
+					else
 						frames = Paths.getSparrowAtlas("noteSkins/" + noteSkinPath, "shared");
 
 					animation.addByPrefix('greenScroll', 'green instance 1');
@@ -303,15 +300,11 @@ class Note extends FlxSprite
 
 					setGraphicSize(Std.int(width * 0.7));
 					updateHitbox();
-					antialiasing = FlxG.save.data.antialiasing;
+					antialiasing = PlayerPrefs.antialiasing;
 				default:
-					#if desktop
-					frames = Paths.getModSparrowAtlas('noteSkins/' + PlayState.SONG.noteOpponentTexture);
-					if (frames == null)
-					#end
-						frames = Paths.getSparrowAtlas('noteSkins/' + PlayState.SONG.noteOpponentTexture);
-
-					if (frames == null)
+					if (PlayState.strumLines.members[strumID] != null && PlayState.strumLines.members[strumID].strums.members[noteData] != null)
+						frames = PlayState.strumLines.members[strumID].strums.members[noteData].frames;
+					else
 						frames = Paths.getSparrowAtlas("noteSkins/" + noteSkinPath, "shared");
 
 					animation.addByPrefix('greenScroll', 'green instance 1');
@@ -331,7 +324,7 @@ class Note extends FlxSprite
 
 					setGraphicSize(Std.int(width * 0.7));
 					updateHitbox();
-					antialiasing = FlxG.save.data.antialiasing;
+					antialiasing = PlayerPrefs.antialiasing;
 			}
 		}
 	}
@@ -355,7 +348,7 @@ class Note extends FlxSprite
 
 		setGraphicSize(Std.int(width * 0.7));		
 		updateHitbox();
-		antialiasing = FlxG.save.data.antialiasing;
+		antialiasing = PlayerPrefs.antialiasing;
 	}
 
 	public function playNoteAnim()
@@ -374,13 +367,13 @@ class Note extends FlxSprite
 
 		if (isSustainNote && prevNote != null)
 		{
-			if (Main.gameSettings.getSettingBool("Downscroll"))
+			if (PlayerPrefs.downscroll)
 				angle = 180;
 
 			noteScore * 0.2;
 			alpha = 0.6;
 
-			if (Main.gameSettings.getSettingBool("Middlescroll") && !isPlayer && !inCharter)
+			if (PlayerPrefs.middlescroll && !isPlayer && !inCharter)
 				alpha = 0;
 
 			switch (noteData)
@@ -421,25 +414,35 @@ class Note extends FlxSprite
 		}
 	}
 
+	public function runGhostTimer() {
+		canGhost = true;
+		noAnim = true;
+		new FlxTimer().start(0.05, function(tmr:FlxTimer){
+			canGhost = false;
+			noAnim = false;
+		});	
+	}
+
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
 
-		var safeZone = Conductor.safeZoneOffset * 0.5;
+		var canPress:Bool = (playerLane == strumID);
+		isPlayer = canPress;
 
-		if (mustPress)
+		if (canPress)
 		{
 			if (PlayState.usingBotPlay)
 				canBeHit = (strumTime <= Conductor.songPosition);
 			else
 			{
 				if (strumTime > Conductor.songPosition - Conductor.safeZoneOffset
-					&& strumTime < Conductor.songPosition + safeZone)
+					&& strumTime < Conductor.songPosition + (Conductor.safeZoneOffset * 0.5))
 					canBeHit = true;
 				else
 					canBeHit = false;
 
-				if (strumTime < Conductor.songPosition - Conductor.safeZoneOffset && !wasGoodHit)
+				if (strumTime < Conductor.songPosition - Conductor.safeZoneOffset)
 					tooLate = true;
 			}
 		}

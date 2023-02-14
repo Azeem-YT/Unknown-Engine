@@ -26,10 +26,12 @@ typedef SwagSong =
 	var stage:String;
 	var notePlayerTexture:String;
 	var noteOpponentTexture:String;
+	var numbPlayers:Int;
 	#if desktop
 	var events:Array<Dynamic>;
 	#end
 	var threePlayer:Bool;
+	var splashJson:String;
 	var validScore:Bool;
 }
 

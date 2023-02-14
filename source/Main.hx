@@ -14,6 +14,8 @@ import optionHelpers.GameSettings;
 import openfl.events.UncaughtErrorEvent;
 import sys.FileSystem;
 import sys.io.File;
+import Discord.DiscordClient;
+import lime.app.Application;
 
 class Main extends Sprite
 {
@@ -24,6 +26,8 @@ class Main extends Sprite
 	var skipSplash:Bool = true; // Whether to skip the flixel splash screen that appears in release mode.
 	var startFullscreen:Bool = false;
 	public static var gameSettings:GameSettings;
+	public static var notifGroup:NotificationGroup;
+	public static var gotFPS:Bool = false;
 	public static var fpsCap:Float = 60;
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
@@ -108,9 +112,17 @@ class Main extends Sprite
 
 	public static function getFPSCounter()
 	{
-		framerateCounter = new FPS(10, 3, 0xFFFFFF);
-		Lib.current.addChild(framerateCounter);
-		trace("Adding FPS Counter...");
+		if (!gotFPS) {
+			framerateCounter = new FPS(10, 3, 0xFFFFFF);
+			Lib.current.addChild(framerateCounter);
+			trace("Adding FPS Counter...");
+			gotFPS = true;
+		}
+	}
+
+	public static function initNotifs() {
+		//notifGroup = new NotificationGroup();
+		//Lib.current.addChild(notifGroup);
 	}
 
 	public static function setFPSVisible()
@@ -121,7 +133,7 @@ class Main extends Sprite
 
 	public function gameCrashed(errorMsg:UncaughtErrorEvent)
 	{
-		var error:String = "";
+		var error:String = "Game Crashed!\n";
 		var crashPath:String;
 		var stack:Array<StackItem> = CallStack.exceptionStack(true);
 		var curDate:String = Date.now().toString();
@@ -134,17 +146,23 @@ class Main extends Sprite
 		if (!FileSystem.exists("crashs/"))
 			FileSystem.createDirectory("crashs/");
 
-		for (crashStack in stack)
+		for (stackItem in stack)
 		{
-			switch (crashStack)
+			switch (stackItem)
 			{
 				case FilePos(s, file, line, column):
 					error += file + " (line " + line + ")\n";
 				default:
-					Sys.println(crashStack);
+					Sys.println(stackItem);
 			}
 		}
 
+		error += 'nUncaught Error: ' + errorMsg.error + '\nThis is most likey because this version is unfinished. Check for Updates! ';
+
 		File.saveContent(crashPath, error + "\n");
+
+		Application.current.window.alert(error, "Error!");
+		DiscordClient.shutdown();
+		Sys.exit(1);
 	}
 }

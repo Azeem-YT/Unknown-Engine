@@ -1,65 +1,77 @@
 {
-  "framesPath": "characters/DADDY_DEAREST",
-  "flipX": false,
-  "camOffset": [
-    0,
-    0
-  ],
   "animations": [
     {
-      "prefix": "idle",
-      "anim": "Dad idle dance",
-      "indices": [],
-      "fps": 24,
+      "offset": [
+        2,
+        0
+      ],
       "loop": false,
+      "prefix": "idle",
+      "fps": 24,
+      "anim": "Angry Senpai Idle",
+      "indices": []
+    },
+    {
+      "offset": [
+        5,
+        37
+      ],
+      "loop": false,
+      "prefix": "singUP",
+      "fps": 24,
+      "anim": "Angry Senpai UP NOTE",
+      "indices": []
+    },
+    {
+      "offset": [
+        40,
+        0
+      ],
+      "loop": false,
+      "prefix": "singLEFT",
+      "fps": 24,
+      "anim": "Angry Senpai LEFT NOTE",
+      "indices": []
+    },
+    {
       "offset": [
         0,
         0
-      ]
-    },
-    {
-      "prefix": "singUP",
-      "anim": "Dad Sing Note UP",
-      "indices": [],
-      "fps": 24,
+      ],
       "loop": false,
-      "offset": [
-        -6,
-        50
-      ]
-    },
-    {
-      "prefix": "singLEFT",
-      "anim": "Dad Sing Note LEFT",
-      "indices": [],
-      "fps": 24,
-      "loop": false,
-      "offset": [
-        -10,
-        10
-      ]
-    },
-    {
       "prefix": "singRIGHT",
-      "anim": "Dad Sing Note RIGHT",
-      "indices": [],
       "fps": 24,
-      "loop": false,
-      "offset": [
-        0,
-        27
-      ]
+      "anim": "Angry Senpai RIGHT NOTE",
+      "indices": []
     },
     {
-      "prefix": "singDOWN",
-      "anim": "Dad Sing Note DOWN",
-      "indices": [],
-      "fps": 24,
-      "loop": false,
       "offset": [
-        0,
-        -30
-      ]
+        14,
+        0
+      ],
+      "loop": false,
+      "prefix": "singDOWN",
+      "fps": 24,
+      "anim": "Angry Senpai DOWN NOTE",
+      "indices": []
     }
-  ]
+  ],
+  "noAntialiasing": true,
+  "framesPath": "characters/senpai",
+  "position": [
+    200,
+    360
+  ],
+  "healthIcon": "icon-senpai",
+  "flip_x": false,
+  "healthColors": [
+    255,
+    170,
+    111
+  ],
+  "camOffset": [
+    -205,
+    -330
+  ],
+  "scale": 6
 }

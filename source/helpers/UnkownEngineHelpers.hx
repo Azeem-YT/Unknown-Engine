@@ -10,6 +10,7 @@ using StringTools;
 class UnkownEngineHelpers
 {
     public static var moduleStarted:Bool = false;
+    public static var foundCharFiles:Array<String> = [];
 
     public static function getCustomPath(file:String, type:AssetType, ?library:Null<String>, isMod:Bool = false)
     {

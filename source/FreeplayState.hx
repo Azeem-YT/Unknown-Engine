@@ -17,6 +17,7 @@ import haxe.Json;
 import haxe.format.JsonParser;
 import sys.FileSystem;
 import sys.io.File;
+import flixel.FlxCamera;
 
 using StringTools;
 
@@ -71,11 +72,21 @@ class FreeplayState extends MusicBeatState
 	private var iconArray:Array<HealthIcon> = [];
 
 	public static var diffArray:Array<String> = ['easy', 'normal', 'hard'];
+	public var pushedSongs:Map<String, Bool>;
+	public var camMAIN:FlxCamera;
 
 	public var diff:String = '';
 
 	override function create()
 	{
+		// var gameCam:FlxCamera = FlxG.camera;
+		camMAIN = new FlxCamera(0, 0, FlxG.width, FlxG.height);
+		FlxG.cameras.reset(camMAIN);
+		FlxCamera.defaultCameras = [camMAIN];
+
+		pushedSongs = new Map<String, Bool>();
+		pushedSongs.clear();
+
 		var directorys:Array<String> = [Paths.getPreloadPath()];
 
 		#if desktop
@@ -99,7 +110,7 @@ class FreeplayState extends MusicBeatState
 			{
 				for (file in FileSystem.readDirectory(jsonDir))
 				{
-					if (file.endsWith('.json'))
+					if (file.endsWith('.json') && !diffMap.exists(jsonFileName(file)))
 					{
 						var jsonData = Json.parse(File.getContent(jsonDir + file));
 						var jsonName = StringTools.replace(file, ".json", "");
@@ -132,6 +143,8 @@ class FreeplayState extends MusicBeatState
 
 							if (jsonData.difficultys != null)
 								diffMap.set(jsonName, jsonData.difficultys);
+							else
+								diffMap.set(jsonName, ['easy', 'normal', 'hard']);
 						}
 					}
 					else
@@ -139,11 +152,21 @@ class FreeplayState extends MusicBeatState
 
 					for (i in 0...songList.length)
 					{
-						if (songList[i][3] != null)
-							checkSongs.push(new SongMetadata(songList[i][0], songList[i][3], songList[i][1], songList[i][2]));
-						else
-							checkSongs.push(new SongMetadata(songList[i][0], -1, songList[i][1], songList[i][2]));
+						if (songList[i][3] != null) {
+							if (!pushedSongs.exists(songList[i][0])) {
+								checkSongs.push(new SongMetadata(songList[i][0], songList[i][3], songList[i][1], songList[i][2]));
+								pushedSongs.set(songList[i][0], true);
+							}
+						}
+						else {
+							if (!pushedSongs.exists(songList[i][0])) {
+								checkSongs.push(new SongMetadata(songList[i][0], -1, songList[i][1], songList[i][2]));
+								pushedSongs.set(songList[i][0], true);
+							}
+						}
 					}
+
+
 				}
 			}
 		}
@@ -271,6 +294,10 @@ class FreeplayState extends MusicBeatState
 	public function addSong(songName:String, weekNum:Int, songCharacter:String, colors:Array<Int>)
 	{
 		songs.push(new SongMetadata(songName, weekNum, songCharacter, (colors == null ? [0, 0, 0] : colors)));
+	}
+
+	public function jsonFileName(jsonName:String):String {
+		return jsonName.replace('.json', '');
 	}
 
 	public function addWeek(songs:Array<String>, weekNum:Int, ?songCharacters:Array<String>, ?colors:Array<Int>)
@@ -404,18 +431,9 @@ class FreeplayState extends MusicBeatState
 						var songLowerCase = songName.toLowerCase();
 
 						diffToAdd = songName;
+						diffToAdd.replace('.json' , "");
 
-						diffToAdd = StringTools.replace(diffToAdd, songs[curSelected].songName.toLowerCase(), "");
-
-						diffToAdd = StringTools.replace(diffToAdd, '-', "");
-
-						if (songs[curSelected].songName.toLowerCase() == 'tutorial') 
-						{//Tutorial is broken bruh
-							diffToAdd = StringTools.replace(songName, 'tutorial', "");
-							diffToAdd = StringTools.replace(diffToAdd, '-', "");
-						}
-
-						diffToAdd = StringTools.replace(diffToAdd, '.json' , ""); //So much replacing >:(
+						diffToAdd = songDiff(diffToAdd);
 
 						if (diffToAdd == '')
 							diffToAdd = 'normal';
@@ -509,6 +527,12 @@ class FreeplayState extends MusicBeatState
 		scoreBG.x = (FlxG.width - scoreBG.scale.x / 2);
 		diffText.x = Std.int(scoreBG.x + (scoreBG.width / 2));
 		diffText.x -= diffText.width / 2;
+	}
+
+	private function songDiff(text:String):String {
+		text = StringTools.replace(text, '.json', "");
+		text = StringTools.replace(text, songs[curSelected].songName.toLowerCase() + '-', "");
+		return text;
 	}
 }
 

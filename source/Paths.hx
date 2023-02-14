@@ -22,12 +22,12 @@ class Paths
 	inline public static var SOUND_EXT = #if web "mp3" #else "ogg" #end;
 	public static var modInst:Map<String, Sound> = new Map<String, Sound>();
 	public static var modVoices:Map<String, Sound> = new Map<String, Sound>();
+	public static var loadedSounds:Map<String, Sound> = new Map<String, Sound>();
 
-	static var currentLevel:String;
+	static var currentLevel:String = 'assets';
 
-	static public function setCurrentLevel(name:String)
-	{
-		currentLevel = name.toLowerCase();
+	static public function setCurrentLevel(name:String) {
+	 	currentLevel = name.toLowerCase();
 	}
 
 	public static function getPath(file:String, type:AssetType, ?library:Null<String>)
@@ -68,56 +68,101 @@ class Paths
 	}
 
 	inline static public function file(file:String, type:AssetType = TEXT, ?library:String)
-	{
 		return getPath(file, type, library);
-	}
 
-	inline static public function txt(key:String, ?library:String)
-	{
+	inline static public function txt(key:String, ?library:String):Any {
+		#if desktop
+		if (FileSystem.exists(mods('$key.txt')))
+			return mods('key.txt');
+		#end
+
 		return getPath('$key.txt', TEXT, library);
 	}
 
 	inline static public function xml(key:String, ?library:String)
-	{
 		return getPath('$key.xml', TEXT, library);
-	}
 
 	inline static public function json(key:String, ?library:String)
-	{
 		return getPath('$key.json', TEXT, library);
-	}
 
 	inline static public function lua(key:String, ?library:String)
-	{
 		return getPath('$key.lua', TEXT, library);
-	}
 
-	static public function sound(key:String, ?library:String)
+	static public function sound(key:String, ?library:String):Any
 	{
+		#if desktop
+		var soundFile:Sound = null;
+
+		if (FileSystem.exists(key))
+		{
+			if (!loadedSounds.exists(key))
+				loadedSounds.set(key, Sound.fromFile(key));
+
+			soundFile = loadedSounds.get(key);
+		}
+
+		if (soundFile != null)
+			return soundFile;
+		#end
+
 		return getPath('sounds/$key.$SOUND_EXT', SOUND, library);
 	}
 
-	inline static public function soundRandom(key:String, min:Int, max:Int, ?library:String)
+	inline static public function soundRandom(key:String, min:Int, max:Int, ?library:String):Any
 	{
-		return sound(key + FlxG.random.int(min, max), library);
+		var soundKey:String = key + FlxG.random.int(min, max);
+
+		#if desktop
+		var soundFile:Sound = null;
+
+		if (FileSystem.exists(soundKey))
+		{
+			if (!loadedSounds.exists(soundKey))
+				loadedSounds.set(soundKey, Sound.fromFile(soundKey));
+
+			soundFile = loadedSounds.get(soundKey);
+		}
+
+		if (soundFile != null)
+			return soundFile;
+		#end
+
+		return sound(soundKey, library);
 	}
 
-	inline static public function music(key:String, ?library:String)
+	inline static public function music(key:String, ?library:String):Any
 	{
+		#if desktop
+		var soundFile:Sound = null;
+
+		if (FileSystem.exists(key))
+		{
+			if (!loadedSounds.exists(key))
+				loadedSounds.set(key, Sound.fromFile(key));
+
+			soundFile = loadedSounds.get(key);
+		}
+
+		if (soundFile != null)
+			return soundFile;
+		#end
+
 		return getPath('music/$key.$SOUND_EXT', MUSIC, library);
 	}
 
 	inline static public function voices(song:String):Any
 	{
+		song = song.toLowerCase();
+
 		#if desktop
 		var songFile:Sound = null;
 
 		if (FileSystem.exists(modvoices(song)))
 		{
-			if (!modInst.exists(song))
-				modInst.set(song, Sound.fromFile(modvoices(song)));
+			if (!modVoices.exists(song))
+				modVoices.set(song, Sound.fromFile(modvoices(song)));
 
-			songFile = modInst.get(song);
+			songFile = modVoices.get(song);
 		}
 
 		if (songFile != null)
@@ -162,15 +207,37 @@ class Paths
 		return getPath('images/$key.png', IMAGE, library);
 	}
 
-	inline static public function mp3(key:String, ?library:String)
-	{
+	inline static public function mp3(key:String, ?library:String):Any {
+		#if desktop
+		var soundFile:Sound = null;
+
+		if (FileSystem.exists(key))
+		{
+			if (!loadedSounds.exists(key))
+				loadedSounds.set(key, Sound.fromFile(key));
+
+			soundFile = loadedSounds.get(key);
+		}
+
+		if (soundFile != null)
+			return soundFile;
+		#end
+
 		return getPath('music/$key.mp3', MUSIC, library);
 	}
 
 	inline static public function module(key:String, ?library:String)
-	{
 		return getPath('modules/$key.hxs', TEXT, library);
-	}
+
+	/*
+		inline static public function getCharMod(char:String = 'bf') {
+			#if desktop
+			if (FileSystem.exists(Paths.mods('modules/characters/$char.hxs'))
+				return Paths.mods('modules/characters/$char.hxs');
+			else
+				return module('characters/' + char;
+			#end
+	*/
 
 	inline static public function video(key:String)
 	{
@@ -202,96 +269,83 @@ class Paths
 			return getPreloadPath('modules/$key.hxs');
 	}
 
-	inline static public function getSparrowAtlas(key:String, ?library:String)
-	{
+	inline static public function getSparrowAtlas(key:String, ?library:String) {
+		#if desktop
+		var sparrow = getModSparrowAtlas(key);
+
+		if (sparrow != null)
+			return sparrow;
+		#end
 		return FlxAtlasFrames.fromSparrow(image(key, library), file('images/$key.xml', library));
 	}
 
-	inline static public function getPackerAtlas(key:String, ?library:String)
-	{
+	inline static public function getPackerAtlas(key:String, ?library:String) {
+		#if desktop
+		var packer = getModPackerAtlas(key);
+
+		if (packer != null)
+			return packer;
+		#end
+
 		return FlxAtlasFrames.fromSpriteSheetPacker(image(key, library), file('images/$key.txt', library));
 	}
 
-	inline static public function getSongPath(song:String)
-	{
+	inline static public function getSongPath(song:String) {
 		song = song.toLowerCase();
-
 		return 'assets/data/$song/';
 	}
 
 	#if desktop
-
 	public static var graphicIsLoaded:Map<String, Bool> = new Map<String, Bool>();
-	public static var loadedSounds:Map<String, Sound> = new Map<String, Sound>();
 
-	inline static public function mods(key:String = '') //getModPath was so useless. It prevented the images and other stuff to be loaded
-	{
+	inline static public function mods(key:String = '') {
 		if (key != '' && key != null)
 			return 'mods/$key';
 		else
 			return 'mods/';
 	}
-	
-	public inline static function getModPreloadPath(?file:String) //Kept this here bc i didnt want to edit all the getModPreloadPaths
-	{
-		if (file != '' && file != null)
-			return 'mods/$file';
-		else
-			return 'mods/';
-	}
 
 	inline static public function stageLua(file:String)
-	{
 		return mods('stages/$file.lua');
-	}
 
 	inline static public function modJson(key:String = '') 
-	{
 		return mods('$key.json');
-	}
 
 	inline static public function modMusic(key:String = '')
-	{
 		return mods('music/$key.$SOUND_EXT');
-	}
 
 	inline static public function modSounds(key:String = '')
-	{
 		return mods('sounds/$key.$SOUND_EXT');
-	}
+
 	inline static public function modImages(key:String = '')
-	{
 		return mods('images/$key.png');
-	}
+
 	inline static public function modXml(key:String = '')
-	{
 		return mods('$key.xml');
-	}
+
 	inline static public function modTxt(key:String = '')
-	{
 		return mods('$key.txt');
-	}
+
 	inline static public function modvoices(song:String)
 	{
 		var songLowerCase:String = song.toLowerCase();
 		return 'mods/songs/' + songLowerCase + '/Voices.$SOUND_EXT';
 	}
 
-	inline static public function modinst(song:String)
-	{
+	inline static public function modinst(song:String) {
 		var songLowerCase:String = song.toLowerCase();
-		return 'mods/songs/' + songLowerCase + '/Inst.$SOUND_EXT';
+		return 'mods/songs/$songLowerCase/Inst.$SOUND_EXT';
 	}
 
 	inline static public function modFonts(key:String)
 		return mods('fonts/$key');
 
-	inline static function getFileContent(file:String)
+	inline static function getFileContent(file:String, ?fileExtention:String)
 	{
 		if (FileSystem.exists(mods(file)))
 			return File.getContent(mods(file));
-		else
-			return null;
+
+		return null;
 	}
 
 	inline static public function loadSound(key:String):Any
@@ -352,16 +406,13 @@ class Paths
 		graphicIsLoaded.clear();
 	}
 
-	inline static public function getModSparrowAtlas(key:String)
-	{
+	inline static public function getModSparrowAtlas(key:String) {
 		var graphic:FlxGraphic = getImage(key);
 
 		return FlxAtlasFrames.fromSparrow(graphic, getFileContent('images/$key.xml'));
 	}
 
 	inline static public function getModPackerAtlas(key:String)
-	{
 		return FlxAtlasFrames.fromSpriteSheetPacker(getImage(key), getFileContent('images/$key.txt'));
-	}
 	#end
 }

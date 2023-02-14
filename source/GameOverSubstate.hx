@@ -18,7 +18,6 @@ class GameOverSubstate extends MusicBeatSubstate
 
 	var stageSuffix:String = "";
 	var deathSound:String;
-	public static var moduleArray:Array<UnkownModule>;
 	public static var instance:GameOverSubstate;
 
 	public function new(x:Float, y:Float)
@@ -68,7 +67,7 @@ class GameOverSubstate extends MusicBeatSubstate
 
 		if (deathSound == null)
 			FlxG.sound.play(Paths.sound('fnf_loss_sfx' + stageSuffix));
-		else
+		else {
 			switch (deathSound)
 			{
 				case 'fnf_loss_sfx-pixel':
@@ -81,6 +80,7 @@ class GameOverSubstate extends MusicBeatSubstate
 					#end
 						FlxG.sound.play(Paths.sound('fnf_loss_sfx'));
 			}
+		}
 
 		Conductor.changeBPM(100);
 
@@ -88,12 +88,6 @@ class GameOverSubstate extends MusicBeatSubstate
 		FlxG.camera.target = null;
 
 		bf.playAnim('firstDeath');
-
-		for (module in moduleArray)
-		{
-			if (module.isAlive && module.exists('onDeath'))
-				module.get('onDeath')();
-		}
 	}
 
 	override function update(elapsed:Float)
@@ -115,25 +109,16 @@ class GameOverSubstate extends MusicBeatSubstate
 				ClassShit.switchState(new FreeplayState());
 		}
 
-		if (bf.animation.curAnim.name == 'firstDeath' && bf.animation.curAnim.curFrame == 12)
-		{
+		if (bf.animation.curAnim.name == 'firstDeath' && bf.animation.curAnim.curFrame == 12) {
 			FlxG.camera.follow(camFollow, LOCKON, 0.01);
 		}
 
-		if (bf.animation.curAnim.name == 'firstDeath' && bf.animation.curAnim.finished)
-		{
+		if (bf.animation.curAnim.name == 'firstDeath' && bf.animation.curAnim.finished) {
 			FlxG.sound.playMusic(Paths.music('gameOver' + stageSuffix));
 		}
 
-		if (FlxG.sound.music.playing)
-		{
+		if (FlxG.sound.music.playing) {
 			Conductor.songPosition = FlxG.sound.music.time;
-		}
-
-		for (module in moduleArray)
-		{
-			if (module.isAlive && module.exists('onDeath'))
-				module.get('onDeath');
 		}
 	}
 
@@ -150,12 +135,6 @@ class GameOverSubstate extends MusicBeatSubstate
 	{
 		if (!isEnding)
 		{
-			for (module in moduleArray)
-			{
-				if (module.isAlive && module.exists('onDeathConfirm'))
-					module.get('onDeathConfirm')();
-			}
-
 			isEnding = true;
 			bf.playAnim('deathConfirm', true);
 			FlxG.sound.music.stop();

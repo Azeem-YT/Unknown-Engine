@@ -2,14 +2,15 @@ package;
 
 import flixel.*;
 import flixel.math.FlxMath;
-import OptionsState;
+import options.OptionsState;
 
 using StringTools;
 
 class OptionPref extends FlxObject
 {
 	public var optionType:String;
-	public var curValue:Float = 0;
+	public var optionName:String;
+	public var curValue:Dynamic = 0;
 	public var curSeleted:Int = 0;
 	public var minValue:Dynamic = 0;
 	public var maxValue:Float = 30;
@@ -20,7 +21,8 @@ class OptionPref extends FlxObject
 	public var onLeft:Void -> Void;
 	public var onRight:Void -> Void;
 	public var onEnter:(isChecked:Bool) -> Void;
-	public var isChecked:Bool = false;
+	public var enterFunction:Void -> Void;
+	public var checked:Bool = false;
 	public var checkmark:AlphaCheckbox;
 	public var selector:AlphaSelector;
 	public var stringSelector:StringSelector;
@@ -29,29 +31,15 @@ class OptionPref extends FlxObject
 	public var variableName:String;
 	public var text:String = '';
 
-	public function new(x:Float, y:Float, variableName:String, optionText:String, optionType:String, curValue:Dynamic, parentClass:String = 'OptionPrefs', targetY:Float, defaultValue:Dynamic = null, ?min:Dynamic, ?max:Dynamic, ?valueAddBy:Float = 10, ?options:Array<String>)
+	public function new(variableName:String, optionText:String, optionType:String, defaultValue:Dynamic = null, ?min:Dynamic, ?max:Dynamic, ?valueAddBy:Float = 10, ?options:Array<String>, ?enterFunc:Void -> Void)
 	{
 		this.optionType = optionType;
-		this.targetY = targetY;
 		this.variableName = variableName;
-		alphaText = new Alphabet(x, y, optionText, true, false);
-		alphaText.isMenuItem = true;
-		alphaText.alpha = 0.6;
-		alphaText.targetY = targetY;
 		maxValue = max;
 		minValue = min;
 		valueToAdd = valueAddBy;
-		this.curValue = curValue;
-
-		switch (parentClass)
-		{
-			case 'ModPrefs':
-				ModPrefs.instance.add(alphaText);
-			case 'NotePrefs':
-				NotePrefs.instance.add(alphaText);
-			case 'OptionPrefs':
-				OptionPrefs.instance.add(alphaText);
-		}
+		optionName = optionText;
+		this.curValue = getValue();
 
 		switch (optionType)
 		{
@@ -59,85 +47,55 @@ class OptionPref extends FlxObject
 				optionType = 'int';
 			case 'booleen':
 				optionType = 'bool';
+			case 'fl':
+				optionType = 'float';
+			case 'str':
+				optionType = 'string';
 		}
 
-		if (this.optionType == 'bool') {
-			checkmark = new AlphaCheckbox(x, y, getValue(), parentClass);
-			checkmark.alphaParent = alphaText;
-			switch (parentClass)
-			{
-				case 'ModPrefs':
-					ModPrefs.instance.add(checkmark);
-				case 'NotePrefs':
-					NotePrefs.instance.add(checkmark);
-				case 'OptionPrefs':
-					OptionPrefs.instance.add(checkmark);
-			}
-		} else if (this.optionType == 'float') {
-			selector = new AlphaSelector(x, y, min, max, curValue, defaultValue, 'Float');
-			selector.alphaParent = alphaText;
-
-			switch (parentClass)
-			{
-				case 'ModPrefs':
-					ModPrefs.instance.add(selector);
-				case 'NotePrefs':
-					NotePrefs.instance.add(selector);
-				case 'OptionPrefs':
-					OptionPrefs.instance.add(selector);
-			}
-		} else if (this.optionType == 'int') {
-			selector = new AlphaSelector(x, y, min, max, curValue, defaultValue, 'Int');
-			selector.alphaParent = alphaText;
-
-			switch (parentClass)
-			{
-				case 'ModPrefs':
-					ModPrefs.instance.add(selector);
-				case 'NotePrefs':
-					NotePrefs.instance.add(selector);
-				case 'OptionPrefs':
-					OptionPrefs.instance.add(selector);
-			}
-		} else if (this.optionType == 'string' && options != null) {
-			optionsArray = options;
-			stringSelector = new StringSelector(x, y, curValue, defaultValue);
-			stringSelector.alphaParent = alphaText;
-
-			switch (parentClass)
-			{
-				case 'ModPrefs':
-					ModPrefs.instance.add(stringSelector);
-				case 'NotePrefs':
-					NotePrefs.instance.add(stringSelector);
-				case 'OptionPrefs':
-					OptionPrefs.instance.add(stringSelector);
-			}
+		switch (this.optionType) {
+			case 'bool':
+				checkmark = new AlphaCheckbox(x, y, getValue(), '');
+			case 'float':
+				selector = new AlphaSelector(x, y, min, max, curValue, defaultValue, 'Float');
+			case 'int':
+				selector = new AlphaSelector(x, y, min, max, curValue, defaultValue, 'Int');
+			case 'string':
+				optionsArray = options;
+				stringSelector = new StringSelector(x, y, curValue, defaultValue, optionsArray);
+				stringSelector.setText(curSelected);
+			case 'function':
+				enterFunction = enterFunc;
 		}
 
 		super(x, y);
 	}
 
+	public function setCheckmark(){
+		checkmark.getChecked(getValue());
+	}
+
 	public function onPressLeft(?endFunction:Void -> Void)
 	{
-		if (optionType == 'float' || optionType == 'int') {
-			curValue -= valueToAdd;
+		switch (optionType)
+		{
+			case 'int' | 'float':
+				curValue -= valueToAdd;
 
-			if (curValue < minValue)
-				curValue = minValue;
+				if (curValue < minValue)
+					curValue = minValue;
 
-			if (optionType == 'float')
-				selector.changeAlphaText(Std.string(FlxMath.roundDecimal(curValue, 1)));
-			else
-				selector.changeAlphaText(Std.string(Math.round(curValue)));
+				if (optionType == 'float')
+					selector.changeAlphaText(Std.string(FlxMath.roundDecimal(curValue, 1)));
+				else
+					selector.changeAlphaText(Std.string(Math.round(curValue)));
 
-			if (optionType == 'int')
-				setValue(Math.round(curValue));
-			else
-				setValue(curValue);
-		}
-		else if (optionType == 'string') {
-			changeSelection(-1);
+				if (optionType == 'int')
+					setValue(Math.round(curValue));
+				else
+					setValue(curValue);
+			case 'string':
+				changeSelection(-1);
 		}
 
 		if (endFunction != null)
@@ -146,25 +104,24 @@ class OptionPref extends FlxObject
 
 	public function onPressRight(?endFunction:Void -> Void)
 	{
-		var newValue:Dynamic = null;
+		switch (optionType)
+		{
+			case 'int' | 'float':
+				curValue += valueToAdd;
+				if (curValue > maxValue)
+					curValue = maxValue;
 
-		if (optionType == 'float' || optionType == 'int') {
-			curValue += valueToAdd;
-			if (curValue > maxValue)
-				curValue = maxValue;
+				if (optionType == 'float')
+					selector.changeAlphaText(Std.string(FlxMath.roundDecimal(curValue, 1)));
+				else
+					selector.changeAlphaText(Std.string(Math.round(curValue)));
 
-			if (optionType == 'float')
-				selector.changeAlphaText(Std.string(FlxMath.roundDecimal(curValue, 1)));
-			else
-				selector.changeAlphaText(Std.string(Math.round(curValue)));
-
-			if (optionType == 'int')
-				setValue(Math.round(curValue));
-			else
-				setValue(curValue);
-		}
-		else if (optionType == 'string') {
-			changeSelection(1);
+				if (optionType == 'int')
+					setValue(Math.round(curValue));
+				else
+					setValue(curValue);
+			case 'string':
+				changeSelection(1);
 		}
 
 		if (endFunction != null)
@@ -172,11 +129,17 @@ class OptionPref extends FlxObject
 	}
 
 	public function onPressEnter(?onCheck:(isChecked:Bool) -> Void) {
-		checkmark.switchCheck(function(isChecked:Bool){
-			setValue(isChecked);
-			if (onCheck != null)
-				onCheck(isChecked);
-		});
+		switch (optionType) {
+			case 'bool':
+				checkmark.switchCheck(function(isChecked:Bool){
+					setValue(isChecked);
+					if (onCheck != null)
+						onCheck(checked);
+				});
+			case 'function':
+				if (enterFunction != null)
+					enterFunction();
+		}
 	}
 
 	public function changeSelection(change:Int) //Used for String Options
@@ -189,37 +152,47 @@ class OptionPref extends FlxObject
 			curSelected = 0;
 
 		optionSelected = optionsArray[curSelected];
-		stringSelector.alphaText = optionSelected;
-		stringSelector.changeAlphaText(optionSelected);
+		stringSelector.setText(curSelected);
+
+		if (change > 0)
+			stringSelector.onRight();
+		else if (change < 0)
+			stringSelector.onLeft();
+
 		setValue(optionSelected);
 	}
 
-	override function update(elapsed:Float)
-	{
-		if (alphaText.targetY != targetY)
-			alphaText.targetY = targetY;
-
-		switch (optionType)
-		{
-			case 'bool':
-				checkmark.checkbox.x = alphaText.lastSprite.x + 50;
-				checkmark.checkbox.y = alphaText.lastSprite.y - 50;
-			case 'int' | 'float':
-				selector.y = alphaText.lastSprite.y;
-				selector.x = alphaText.lastSprite.x + 50;
-			case 'string':
-				stringSelector.alphabetText.x = alphaText.lastSprite.x + (alphaText.lastSprite.width * 2);
-				stringSelector.alphabetText.y = alphaText.y - 50;
-		}
-
-		super.update(elapsed);
+	public function setValueText() {
+		if (optionType == 'float')
+			selector.changeAlphaText(Std.string(FlxMath.roundDecimal(curValue, 2)));
+		else if (optionType == 'int')
+			selector.changeAlphaText(Std.string(Math.round(curValue)));
 	}
 
 	public function getValue():Dynamic
-		return Reflect.getProperty(PlayerPrefs, variableName);
+	{	
+
+		if (Reflect.getProperty(PlayerPrefs, variableName) != null) {
+			if (optionType == 'string') {
+				if (PlayerPrefs.selectedOption.exists(variableName))
+					curSelected = PlayerPrefs.selectedOption.get(variableName);
+			}
+			return Reflect.getProperty(PlayerPrefs, variableName);
+		}
+		return PlayerPrefs.modVariables.get(variableName);
+	}
 
 	public function setValue(value:Dynamic) {
-		Reflect.setProperty(PlayerPrefs, variableName, value);
+		if (Reflect.getProperty(PlayerPrefs, variableName) != null) {
+			Reflect.setProperty(PlayerPrefs, variableName, value);
+			if (optionType == 'string')
+				PlayerPrefs.selectedOption.set(variableName, curSelected);
+		}
+		else {
+			PlayerPrefs.modVariables.set(variableName, value);
+			if (optionType == 'string')
+				PlayerPrefs.selectedOption.set(variableName, curSelected);
+		}
 		PlayerPrefs.savePrefs();
 		Main.gameSettings.resetSettings();
 		trace('Set Seting: ' + variableName + ' to ' + value);

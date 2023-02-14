@@ -235,8 +235,7 @@ class DialogueBox extends FlxSpriteGroup
 
 		if (box.animation.curAnim != null)
 		{
-			if (box.animation.curAnim.name == 'normalOpen' && box.animation.curAnim.finished)
-			{
+			if (box.animation.curAnim.name == 'normalOpen' && box.animation.curAnim.finished) {
 				box.animation.play('normal');
 				dialogueOpened = true;
 			}
@@ -253,7 +252,7 @@ class DialogueBox extends FlxSpriteGroup
 			dialogueStarted = true;
 		}
 
-		if (FlxG.keys.justPressed.ANY  && dialogueStarted == true)
+		if ((FlxG.keys.justPressed.ENTER || FlxG.keys.justPressed.SPACE)  && dialogueStarted == true)
 		{
 			remove(dialogue);
 				
@@ -285,8 +284,7 @@ class DialogueBox extends FlxSpriteGroup
 					});
 				}
 			}
-			else
-			{
+			else {
 				dialogueList.remove(dialogueList[0]);
 				startDialogue();
 			}

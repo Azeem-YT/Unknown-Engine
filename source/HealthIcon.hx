@@ -77,12 +77,18 @@ class HealthIcon extends FlxSprite
 			antialiasing = true;
 		}
 
-		if (char.endsWith('-pixel')) 
-		{
+		if (char.endsWith('-pixel')) {
 			antialiasing = false;
 		}
 
 		iconIsAnimated = isAnimated;
+		if (antialiasing)
+			antialiasing = PlayerPrefs.antialiasing;
+
+		if (this == null) {
+			trace('icon with character ' + char + ' is null!');
+			loadGraphic(Paths.image("icons/icon-face"), true, 150, 150);
+		}
 	}
 
 	override function update(elapsed:Float)

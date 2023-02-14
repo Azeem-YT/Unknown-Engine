@@ -1,5 +1,5 @@
 {
-  "framesPath": "characters/DADDY_DEAREST",
+  "framesPath": "characters/Mom_Assets",
   "flipX": false,
   "camOffset": [
     0,
@@ -8,7 +8,7 @@
   "animations": [
     {
       "prefix": "idle",
-      "anim": "Dad idle dance",
+      "anim": "Mom Idle",
       "indices": [],
       "fps": 24,
       "loop": false,
@@ -19,47 +19,50 @@
     },
     {
       "prefix": "singUP",
-      "anim": "Dad Sing Note UP",
+      "anim": "Mom Up Pose",
       "indices": [],
       "fps": 24,
       "loop": false,
       "offset": [
-        -6,
-        50
+        14,
+        71
       ]
     },
     {
       "prefix": "singLEFT",
-      "anim": "Dad Sing Note LEFT",
+      "anim": "Mom Left Pose",
       "indices": [],
       "fps": 24,
       "loop": false,
       "offset": [
-        -10,
-        10
+        250,
+        -23
       ]
     },
     {
       "prefix": "singRIGHT",
-      "anim": "Dad Sing Note RIGHT",
+      "anim": "Mom Pose Left",
       "indices": [],
       "fps": 24,
       "loop": false,
       "offset": [
-        0,
-        27
+        10,
+        -60
       ]
     },
     {
       "prefix": "singDOWN",
-      "anim": "Dad Sing Note DOWN",
+      "anim": "MOM DOWN POSE",
       "indices": [],
       "fps": 24,
       "loop": false,
       "offset": [
-        0,
-        -30
+        20,
+        -160
       ]
     }
-  ]
+  ],
+  "healthIcon": "icon-mom",
+  "scale": 1,
+  "idleOnBeat": 2
 }

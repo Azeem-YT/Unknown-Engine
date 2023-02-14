@@ -36,17 +36,25 @@ class Stage
 		var jsonData = null;
 
 		#if desktop
-		if (FileSystem.exists(Paths.mods('stages/' + curStage + '/' + curStage + '.json')))
+		if (FileSystem.exists(Paths.mods('stages/' + curStage + '/' + curStage + '.json'))) {
 			jsonData = Json.parse(File.getContent(Paths.mods('stages/' + curStage + '/' + curStage + '.json')));
-		else if (Assets.exists(Paths.getPreloadPath('stages/$curStage/$curStage.json')))
+			trace('Stage Found! ' + Paths.mods('stages/' + curStage + '/' + curStage + '.json'));
+		}
+		else if (Assets.exists(Paths.getPreloadPath('stages/$curStage/$curStage.json'))) {
 			jsonData = Json.parse(Assets.getText(Paths.getPreloadPath('stages/$curStage/$curStage.json')));
+			trace('Stage Found! ' + Paths.getPreloadPath('stages/$curStage/$curStage.json'));
+		}
 		#else
-		if (Assets.exists(Paths.getPreloadPath('stages/$curStage/$curStage.json')))
+		if (Assets.exists(Paths.getPreloadPath('stages/$curStage/$curStage.json'))) {
 			jsonData = Json.parse(Assets.getText(Paths.getPreloadPath('stages/$curStage/$curStage.json')));
+			trace('Stage Found! ' + Paths.getPreloadPath('stages/$curStage/$curStage.json'));
+		}
 		#end
 
-		if (jsonData == null)
+		if (jsonData == null) {
 			jsonData = loadDefaultData(jsonData);
+			trace('Stage Error! Loaded default json');
+		}
 
 		return jsonData;
 	}

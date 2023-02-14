@@ -1,8 +1,7 @@
 {
-  "framesPath": "characters/BOYFRIEND",
-  "flipX": true,
+  "framesPath": "characters/bfChristmas",
   "camOffset": [
-    0,
+    -350,
     0
   ],
   "animations": [
@@ -13,8 +12,8 @@
       "fps": 24,
       "loop": false,
       "offset": [
-        0,
-        -5
+        -5,
+        0
       ]
     },
     {
@@ -129,13 +128,24 @@
     },
     {
       "prefix": "deathLoop",
-      "anim": "BF Dead confirm",
+      "anim": "BF Dead Loop",
       "indices": [],
       "fps": 24,
       "loop": false,
       "offset": [
         37,
         5
+      ]
+    },
+    {
+      "prefix": "deathConfirm",
+      "anim": "BF Dead confirm",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        37,
+        69
       ]
     },
     {
@@ -148,6 +158,28 @@
         -4,
         0
       ]
+    },
+    {
+      "prefix": "dodge",
+      "anim": "boyfriend dodge",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        0,
+        0
+      ]
     }
+  ],
+  "healthIcon": "icon-bf",
+  "positionOffset": [
+    0,
+    350
+  ],
+  "flipX": true,
+  "healthColors": [
+    49,
+    176,
+    209
   ]
 }

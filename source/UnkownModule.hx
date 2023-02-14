@@ -8,7 +8,7 @@ import flixel.math.*;
 import flixel.graphics.*;
 import flixel.input.*;
 import flixel.input.keyboard.*;
-import shaders.*;
+import flixel.addons.display.FlxBackdrop;
 import haxe.Exception;
 import haxe.ds.StringMap;
 import hscript.Expr;
@@ -38,8 +38,7 @@ class ModuleHandler
 	public static var parser:Parser;
 	public static var vars:StringMap<Dynamic>;
 
-	public function new()
-	{
+	public function new() {
 	
 	}
 
@@ -78,10 +77,10 @@ class ModuleHandler
 		vars.set("FlxCamera", FlxCamera);
 		vars.set("FlxPoint", FlxPoint);
 		vars.set("FlxAnimate", flxanimate.FlxAnimate);
-		vars.set("GraphicShader", GraphicShader);
-		vars.set("Shaders", GraphicShader.Shaders);
 		vars.set("Song", Song);
 		vars.set("Strum", Strum);
+		vars.set("PlayerPrefs", PlayerPrefs);
+		vars.set("FlxBackdrop", FlxBackdrop);
 		#if desktop
 		vars.set("Event", Event);
 		#end
@@ -99,20 +98,14 @@ class ModuleHandler
 		vars.set("File", File);
 		vars.set("ShaderFilter", ShaderFilter);
 		vars.set("FlxGraphicShader", FlxGraphicsShader);
-		vars.set("Control-LEFT", PlayState.instance.controls.LEFT);
-		vars.set("Control-DOWN", PlayState.instance.controls.DOWN);
-		vars.set("Control-UP", PlayState.instance.controls.UP);
-		vars.set("Control-RIGHT", PlayState.instance.controls.RIGHT);
 		vars.set("Control-UI_LEFT", PlayState.instance.controls.UI_LEFT);
 		vars.set("Control-UI_DOWN", PlayState.instance.controls.UI_DOWN);
 		vars.set("Control-UI_UP", PlayState.instance.controls.UI_UP);
 		vars.set("Control-UI_RIGHT", PlayState.instance.controls.UI_RIGHT);
 		vars.set("Main", Main);
 		vars.set("loadModule", loadModule);
-		vars.set("setClassVar", PlayState.setClassVar);
-		vars.set("getClassVar", PlayState.getClassVar);
 		vars.set("playSound", FlxG.sound.play);
-		vars.set("add", PlayState.instance.add);
+		vars.set("add", PlayState.addObject);
 		vars.set("remove", PlayState.instance.remove);
 		vars.set("boyfriend", PlayState.boyfriend);
 		vars.set("dad", PlayState.dad);
@@ -122,9 +115,6 @@ class ModuleHandler
 		vars.set("changeGfChar", PlayState.instance.changeGfChar);
 		vars.set("setCamZoom", PlayState.instance.setCamZoom);
 		vars.set("screenCenterX", screenCenterX);
-		vars.set("setCharacterProperty", PlayState.instance.setCharacterProperty);
-		vars.set("setCharacterX", PlayState.instance.setCharacterX);
-		vars.set("setCharacterY", PlayState.instance.setCharacterY);
 		vars.set("addCharacter", PlayState.instance.addCharacter);
 		vars.set("killPlayer", PlayState.instance.killPlayer);
 		vars.set("screenCenterObjectX", screenCenterObjectX);
@@ -132,6 +122,7 @@ class ModuleHandler
 		vars.set("setCamBGColorAlpha", setCamBGColorAlpha);
 		vars.set("trace", traceText);
 		vars.set("setColor", setColor);
+		vars.set("returnColor", returnColor);
 
 		//Thats a lot of Variables...
 	}
@@ -153,6 +144,12 @@ class ModuleHandler
 
 	public function traceText(text:Dynamic) {
 		trace(text);
+	}
+
+	public function returnColor(color:String = 'BLACK'):FlxColor {
+		var colorVal:FlxColor = FlxColor.fromString(color);
+
+		return colorVal;
 	}
 
 	public function setTextBorderStyle(text:FlxText, style:String = 'OUTLINE', color:String = '0', size:Float = 1, quality:Float = 1)
@@ -185,14 +182,14 @@ class ModuleHandler
 			sprite.color = FlxColor.fromString(colorString);
 	}
 
-	public function loadModule(path:String, ?params:StringMap<Dynamic>):UnkownModule
+	public function loadModule(path:String, moduleID:String = null):UnkownModule
 	{
 		var daPath:String = path;
 
 		if (FileSystem.exists(daPath))
-			return new UnkownModule(parser.parseString(File.getContent(daPath)), params);
+			return new UnkownModule(parser.parseString(File.getContent(daPath)), moduleID);
 		else
-			return new UnkownModule(null, params);
+			return new UnkownModule(null, moduleID);
 	}
 }
 
@@ -201,8 +198,9 @@ class UnkownModule
 	public var interp:Interp;
 
 	public var isAlive:Bool = true;
+	public var moduleID:String = null;
 
-	public function new(?contents:Expr, ?params:StringMap<Dynamic>)
+	public function new(?contents:Expr, ?moduleID:String = null)
 	{
 		if (contents != null)
 		{
@@ -217,6 +215,7 @@ class UnkownModule
 			interp.variables.set("set", set);
 
 			interp.execute(contents);
+			this.moduleID = moduleID;
 		}
 		else
 			exit();

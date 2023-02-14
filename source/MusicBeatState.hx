@@ -22,10 +22,10 @@ class MusicBeatState extends FlxUIState
 
 	override function create()
 	{
-		if (transIn != null)
-			trace('reg ' + transIn.region);
-
 		super.create();
+
+		if (!PlayerPrefs.persistentCache)
+			Paths.removeLoadedImages();
 	}
 
 	public function getControlPress(control:String):Bool
@@ -43,14 +43,14 @@ class MusicBeatState extends FlxUIState
 				returnValue = controls.UI_UP;
 			case 'ui_right':
 				returnValue = controls.UI_RIGHT;
-			case 'left':
-				returnValue = controls.LEFT;
-			case 'down':
-				returnValue = controls.DOWN;
-			case 'up':
-				returnValue = controls.UP;
-			case 'right':
-				returnValue = controls.RIGHT;
+			case 'note_left':
+				returnValue = controls.NOTE_LEFT;
+			case 'note_down':
+				returnValue = controls.NOTE_DOWN;
+			case 'note_up':
+				returnValue = controls.NOTE_UP;
+			case 'note_right':
+				returnValue = controls.NOTE_RIGHT;
 		}
 
 		return returnValue;

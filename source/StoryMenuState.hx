@@ -27,6 +27,7 @@ typedef WeekJson =
 {
 	var songs:Array<Dynamic>;
 	var characters:Array<String>;
+	var menuChars:Array<String>;
 	var startUnlocked:Bool;
 	var weekName:String;
 	var difficultys:Array<String>;
@@ -167,7 +168,7 @@ class StoryMenuState extends MusicBeatState
 		var directorys:Array<String> = [Paths.getPreloadPath()];
 
 		#if desktop
-		directorys.push(Paths.getModPreloadPath());
+		directorys.push(Paths.mods());
 		#end
 
 		for (i in 0...directorys.length)
@@ -191,8 +192,6 @@ class StoryMenuState extends MusicBeatState
 
 						jsonNames.push(jsonFile);
 
-						trace(jsonFile);
-
 						if (jsonData != null)
 						{
 							fileDirs.push(dir + file);
@@ -207,6 +206,8 @@ class StoryMenuState extends MusicBeatState
 
 							if (jsonData.characters != null && jsonData.characters.length > 0)
 								weekCharacters.push(jsonData.characters);
+							else if (jsonData.menuChars != null && jsonData.menuChars.length > 0)
+								weekCharacters.push(jsonData.menuChars);
 							else
 							{
 								weekCharacters.push(['dad', 'bf', 'gf']);
@@ -400,7 +401,7 @@ class StoryMenuState extends MusicBeatState
 
 	function selectWeek()
 	{
-		if (curWeek > 0 && !getHidden(jsonNames[curWeek]))
+		if (curWeek >= 0 && !getHidden(jsonNames[curWeek]))
 		{
 			if (stopspamming == false)
 			{
@@ -526,35 +527,35 @@ class StoryMenuState extends MusicBeatState
 		grpWeekCharacters.members[1].animation.play(weekCharacters[curWeek][1]);
 		grpWeekCharacters.members[2].animation.play(weekCharacters[curWeek][2]);
 		txtTracklist.text = "Tracks\n";
+		if (grpWeekCharacters.members[0].animation.curAnim != null) {
+			switch (grpWeekCharacters.members[0].animation.curAnim.name)
+			{
+				case 'parents-christmas':
+					grpWeekCharacters.members[0].offset.set(200, 200);
+					grpWeekCharacters.members[0].setGraphicSize(Std.int(grpWeekCharacters.members[0].width * 0.99));
 
-		switch (grpWeekCharacters.members[0].animation.curAnim.name)
-		{
-			case 'parents-christmas':
-				grpWeekCharacters.members[0].offset.set(200, 200);
-				grpWeekCharacters.members[0].setGraphicSize(Std.int(grpWeekCharacters.members[0].width * 0.99));
+				case 'senpai':
+					grpWeekCharacters.members[0].offset.set(130, 0);
+					grpWeekCharacters.members[0].setGraphicSize(Std.int(grpWeekCharacters.members[0].width * 1.4));
 
-			case 'senpai':
-				grpWeekCharacters.members[0].offset.set(130, 0);
-				grpWeekCharacters.members[0].setGraphicSize(Std.int(grpWeekCharacters.members[0].width * 1.4));
+				case 'mom':
+					grpWeekCharacters.members[0].offset.set(100, 200);
+					grpWeekCharacters.members[0].setGraphicSize(Std.int(grpWeekCharacters.members[0].width * 1));
 
-			case 'mom':
-				grpWeekCharacters.members[0].offset.set(100, 200);
-				grpWeekCharacters.members[0].setGraphicSize(Std.int(grpWeekCharacters.members[0].width * 1));
+				case 'dad':
+					grpWeekCharacters.members[0].offset.set(120, 200);
+					grpWeekCharacters.members[0].setGraphicSize(Std.int(grpWeekCharacters.members[0].width * 1));
 
-			case 'dad':
-				grpWeekCharacters.members[0].offset.set(120, 200);
-				grpWeekCharacters.members[0].setGraphicSize(Std.int(grpWeekCharacters.members[0].width * 1));
-
-			default:
-				grpWeekCharacters.members[0].offset.set(100, 100);
-				grpWeekCharacters.members[0].setGraphicSize(Std.int(grpWeekCharacters.members[0].width * 1));
-				// grpWeekCharacters.members[0].updateHitbox();
+				default:
+					grpWeekCharacters.members[0].offset.set(100, 100);
+					grpWeekCharacters.members[0].setGraphicSize(Std.int(grpWeekCharacters.members[0].width * 1));
+					// grpWeekCharacters.members[0].updateHitbox();
+			}
 		}
 
 		var stringThing:Array<String> = weekData[curWeek];
 
-		for (i in stringThing)
-		{
+		for (i in stringThing) {
 			txtTracklist.text += "\n" + i;
 		}
 

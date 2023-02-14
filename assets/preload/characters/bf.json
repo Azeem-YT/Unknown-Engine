@@ -1,8 +1,11 @@
 {
   "framesPath": "characters/BOYFRIEND",
-  "flipX": true,
   "camOffset": [
     0,
+    0
+  ],
+  "playerOffset": [
+    -250,
     0
   ],
   "animations": [
@@ -129,13 +132,24 @@
     },
     {
       "prefix": "deathLoop",
-      "anim": "BF Dead confirm",
+      "anim": "BF Dead Loop",
       "indices": [],
       "fps": 24,
       "loop": false,
       "offset": [
         37,
         5
+      ]
+    },
+    {
+      "prefix": "deathConfirm",
+      "anim": "BF Dead confirm",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        37,
+        69
       ]
     },
     {
@@ -148,6 +162,29 @@
         -4,
         0
       ]
+    },
+    {
+      "prefix": "dodge",
+      "anim": "boyfriend dodge",
+      "indices": [],
+      "fps": 24,
+      "loop": false,
+      "offset": [
+        0,
+        0
+      ]
     }
+  ],
+  "healthIcon": "icon-bf",
+  "sing_duration": 4,
+  "positionOffset": [
+    0,
+    0
+  ],
+  "flipX": true,
+  "healthColors": [
+    49,
+    176,
+    209
   ]
 }

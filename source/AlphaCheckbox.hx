@@ -13,7 +13,7 @@ import flixel.animation.FlxBaseAnimation;
 import flixel.graphics.frames.FlxFrame;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
-import OptionsState;
+import options.OptionsState;
 #if desktop
 import sys.io.File;
 import sys.FileSystem;
@@ -47,15 +47,6 @@ class AlphaCheckbox extends FlxSprite
 		addOffset('true', 20, 70);
 		addOffset('true-finished', getOffset('true', 0) - 8, getOffset('true', 1) - 22);
 		addOffset('false-finished', 0, 0);
-		switch (className)
-		{
-			case 'OptionPrefs':
-				OptionPrefs.instance.add(checkbox);
-			case 'NotePrefs':
-				NotePrefs.instance.add(checkbox);
-			case 'ModPrefs':
-				ModPrefs.instance.add(checkbox);
-		}
 
 		getChecked(isCheck);
 		visible = false;

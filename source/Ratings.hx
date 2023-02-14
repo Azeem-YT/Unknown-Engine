@@ -13,18 +13,30 @@ class Ratings
 	public static var notesHit:Int;
 	public static var scoreText:String = '';
 	public static var accuracyDisplay:Float;
+	public static var ratingText:String = 'PFC';
 	public static var missed:Bool = false;
+	public static var shits:Int = 0;
+	public static var misses:Int = 0;
+	public static var bads:Int = 0;
+	public static var goods:Int = 0;
+	public static var sicks:Int = 0;
 
 	public static function resetAccuracy()
 	{
 		accuracy = 0.001;
 		accuracyDisplay = 0;
 		letterRank = 'N/A';
+		ratingText = '???';
+		sicks = 0;
+		bads = 0;
+		shits = 0;
+		goods = 0;
+		misses = 0;
 
 		notesHit = 0;
 		//comboNum = 0;
 
-		scoreText = 'Accuracy: 0.00%' + PlayState.instance.scoreDivider + ' Rank: ' + letterRank;
+		scoreText = 'Accuracy: 0.00% [' + ratingText + ']' + PlayState.instance.scoreDivider + ' Rank: ' + letterRank;
 	}
 
 	public static function onNoteHit(judgement:String = 'shit', isSustain:Bool = false)
@@ -35,14 +47,25 @@ class Ratings
 		{
 			case 'sick':
 				shit = 100;
+				if (!isSustain)
+					sicks++;
 			case 'good':
 				shit = 75;
+				if (!isSustain)
+					goods++;
 			case 'bad':
 				shit = 25;
+				if (!isSustain)
+					bads++;
 			case 'shit':
 				shit = -50;
+				if (!isSustain)
+					shits++;
 			case 'miss': 
 				shit = -100;
+				if (!isSustain)
+					misses++;
+					
 				if (!missed)
 					missed = true;
 			default:
@@ -50,7 +73,7 @@ class Ratings
 		}
 
 		if (isSustain) {
-			accuracy += Math.max(0, shit) / 2;
+			accuracy += Math.max(0, shit) / 1.5;
 		}
 		else {
 			notesHit++;
@@ -85,10 +108,21 @@ class Ratings
 			letterRank = 'D';
 		else
 			letterRank = 'F';
+
+		if (sicks > 0 && goods == 0 && bads == 0 && shits == 0)
+			ratingText = 'PFC';
+		if (goods > 0 && bads == 0 && shits == 0)
+			ratingText = 'GFC';
+		if (bads > 0 && shits == 0)
+			ratingText = 'FC';
+		if (misses > 1 && misses < 10)
+			ratingText = 'SDCB';
+		if (misses > 10)
+			ratingText = 'CLEAR';
 	}
 
 	public static function updateDisplay()
 	{
-		scoreText = 'Accuracy: ' + accuracyDisplay + '%' + PlayState.instance.scoreDivider + ' Rank: ' + letterRank;
+		scoreText = 'Accuracy: ' + accuracyDisplay + '% [' + ratingText + ']' + PlayState.instance.scoreDivider + ' Rank: ' + letterRank;
 	}
 }

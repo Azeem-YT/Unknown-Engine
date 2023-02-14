@@ -22,11 +22,20 @@ class PlayerPrefs
 	public static var disableReset:Bool = false;
 	public static var camCanZoom:Bool = true;
 	public static var loadedPrefs:Bool = false;
+	public static var showMem:Bool = false;
+	public static var antialiasing:Bool = true;
+	public static var playOpponent:Bool = false;
+	public static var noteOffset:Int = 0;
+	public static var persistentCache:Bool = false;
 	public static var volumeKeys:Map<String, Array<String>> = [
 		'volume_mute' => ['zero', 'none'],
 		'volume_up' => ['numpadplus', 'none'],
 		'volume_down' => ['numpadminus', 'none']
 	];
+
+	public static var modVariables:Map<String, Dynamic> = new Map<String, Dynamic>();
+
+	public static var selectedOption:Map<String, Int> = new Map<String, Int>();
 
 	public static function savePrefs() {
 		if (!loadedPrefs)
@@ -44,6 +53,12 @@ class PlayerPrefs
 		FlxG.save.data.timeBarAlpha = timeBarAlpha;
 		FlxG.save.data.hudAlpha = hudAlpha;
 		FlxG.save.data.healthAlpha = healthAlpha;
+		FlxG.save.data.selectedOption = selectedOption;
+		FlxG.save.data.fpsCounter = fpsCounter;
+		FlxG.save.data.showMem = showMem;
+		FlxG.save.data.antialiasing = antialiasing;
+		FlxG.save.data.playOpponent = playOpponent;
+		FlxG.save.data.modVariables = modVariables;
 	}
 
 	public static function resetPrefs() {
@@ -56,16 +71,16 @@ class PlayerPrefs
 		if(FlxG.save.data.botplay != null) {
 			botplay = FlxG.save.data.botplay;
 		}
-		if(FlxG.save.data.fpsCounter != null) {
+		if (FlxG.save.data.fpsCounter != null) {
 			fpsCounter = FlxG.save.data.fpsCounter;
 		}
 		
 		if(FlxG.save.data.noteSplashes != null) {
-			fpsCounter = FlxG.save.data.noteSplashes;
+			noteSplashes = FlxG.save.data.noteSplashes;
 		}
 
 		if(FlxG.save.data.timeType != null) {
-			fpsCounter = FlxG.save.data.timeType;
+			timeType = FlxG.save.data.timeType;
 		}
 
 		if(FlxG.save.data.camCanZoom != null) {
@@ -88,10 +103,34 @@ class PlayerPrefs
 			healthAlpha = FlxG.save.data.healthAlpha;
 		}
 
+		if (FlxG.save.data.selectedOption != null){
+			selectedOption = FlxG.save.data.selectedOption;
+		}
+
+		if (FlxG.save.data.showMem != null){
+			showMem = FlxG.save.data.showMem;
+		}
+		
+		if (FlxG.save.data.antialiasing != null){
+			antialiasing = FlxG.save.data.antialiasing;
+		}
+
+		if (FlxG.save.data.playOpponent != null){
+			playOpponent = FlxG.save.data.playOpponent;
+		}
+		
+		if (FlxG.save.data.persistentCache != null){
+			persistentCache = FlxG.save.data.persistentCache;
+		}
+
 		if(FlxG.save.data.fpsCap != null) {
 			fpsCap = FlxG.save.data.fpsCap;
 		} else {
 			fpsCap = 144.0;
+		}
+
+		if (FlxG.save.data.modVariables != null) {
+			modVariables = FlxG.save.data.modVariables;
 		}
 
 		setFramerate();
@@ -128,6 +167,14 @@ class PlayerPrefs
 		}
 
 		return returnArray;
+	}
+
+	public static function getOptionValue(option:String):Dynamic {
+		if (Reflect.getProperty(PlayerPrefs, option) != null) {
+			return Reflect.getProperty(PlayerPrefs, option);
+		}
+
+		return modVariables.get(option);
 	}
 
 }

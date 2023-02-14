@@ -60,11 +60,7 @@ class FPS extends TextField
 		var currentCount = times.length;
 		currentFPS = Math.round((currentCount + cacheCount) / 4); //Gotta divide by 4 for some reason???
 
-		if (Main.gameSettings.getSettingBool('FPS Counter'))
-		{
-			visible = true;
-			alpha = 1;
-		}
+		visible = PlayerPrefs.fpsCounter;
 
 		if (currentCount != cacheCount)
 		{
@@ -74,7 +70,7 @@ class FPS extends TextField
 
 			text = "FPS: " + currentFPS;
 
-			if (Main.gameSettings.getSettingBool('Show Memory'))
+			if (PlayerPrefs.showMem)
 				text += '\nMemory: ' + memoryCount + ' MB\nMax Memory: ' + maxMemory + ' MB';
 
 			#if debug

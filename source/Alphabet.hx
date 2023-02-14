@@ -24,6 +24,8 @@ class Alphabet extends FlxSpriteGroup
 	public var isMenuItem:Bool = false;
 	public var alphaChars:Array<AlphaCharacter> = [];
 	public var lastLetter:Int = 0;
+	public var optionItem:Bool = false;
+	public var typeSpeed:Float = 0.05;
 
 	public var text:String = "";
 
@@ -45,24 +47,27 @@ class Alphabet extends FlxSpriteGroup
 
 	var isBold:Bool = false;
 
-	public function new(x:Float, y:Float, text:String = "", ?bold:Bool = false, typed:Bool = false)
+	public function new(x:Float, y:Float, text:String = "", ?bold:Bool = false, ?typed:Bool = false, ?typeSpeed:Float = 0.05)
 	{
 		super(x, y);
 
 		_finalText = text;
 		this.text = text;
 		isBold = bold;
+		this.typeSpeed = typeSpeed;
+
+		if (this.typeSpeed <= 0) {
+			trace('Type Speed is less than 0');
+			this.typeSpeed = 0.05;
+		}
+
 
 		if (text != "")
 		{
 			if (typed)
-			{
 				startTypedText();
-			}
 			else
-			{
 				addText();
-			}
 		}
 	}
 
@@ -70,40 +75,47 @@ class Alphabet extends FlxSpriteGroup
 	{
 		doSplitWords();
 
-		var xPos:Float = 0;
-		for (character in splitWords)
-		{
-			// if (character.fastCodeAt() == " ")
-			// {
-			// }
+		createText(splitWords);
+	}
 
-			if (character == " " || character == "-")
-			{
+	public function createText(newCharacters:Array<String>) {
+
+		var xPos:Float = 0;
+		for (character in newCharacters)
+		{
+			if (character == '-')
+				character = ' ';
+
+			if (character == " ") {
 				lastWasSpace = true;
 			}
 
-			if (AlphaCharacter.alphabet.indexOf(character.toLowerCase()) != -1)
-				// if (AlphaCharacter.alphabet.contains(character.toLowerCase()))
+			var isNumber:Bool = AlphaCharacter.numbers.contains(character);
+			var isSymbol:Bool = AlphaCharacter.symbols.contains(character);
+
+			if (AlphaCharacter.alphabet.indexOf(character.toLowerCase()) != -1 || isNumber|| isSymbol)
 			{
-				if (lastSprite != null)
-				{
+				if (lastSprite != null) {
 					xPos = lastSprite.x + lastSprite.width;
 				}
 
-				if (lastWasSpace)
-				{
+				if (lastWasSpace) {
 					xPos += 40;
 					lastWasSpace = false;
 				}
 
-				// var letter:AlphaCharacter = new AlphaCharacter(30 * loopNum, 0);
 				var letter:AlphaCharacter = new AlphaCharacter(xPos, 0);
 
 				if (isBold)
 					letter.createBold(character);
 				else
 				{
-					letter.createLetter(character);
+					if (isNumber)
+						letter.createNumber(character);
+					else if (isSymbol)
+						letter.createSymbol(character);
+					else
+						letter.createLetter(character);
 				}
 
 				add(letter);
@@ -113,17 +125,19 @@ class Alphabet extends FlxSpriteGroup
 					firstSprite = letter;
 				alphaChars.push(letter);
 			}
-		}
+			else {
+				if (character != ' ')
+					trace('Error with character: ' + character);
+			}
+		} 
 	}
 
 	public function setText(newText:String)
 	{
-		newText = newText.replace('\\n', '\n');
 		removeLetters();
-		splitWords = [];
 		_finalText = newText;
 		text = newText;
-		addText();
+		createText(newText.split(''));
 	}
 
 	public function removeLetters()
@@ -159,9 +173,8 @@ class Alphabet extends FlxSpriteGroup
 		var xPos:Float = 0;
 		var curRow:Int = 0;
 
-		new FlxTimer().start(0.05, function(tmr:FlxTimer)
+		new FlxTimer().start(typeSpeed, function(tmr:FlxTimer)
 		{
-			// trace(_finalText.fastCodeAt(loopNum) + " " + _finalText.charAt(loopNum));
 			if (_finalText.fastCodeAt(loopNum) == "\n".code)
 			{
 				yMulti += 1;
@@ -171,70 +184,40 @@ class Alphabet extends FlxSpriteGroup
 			}
 
 			if (splitWords[loopNum] == " ")
-			{
 				lastWasSpace = true;
-			}
 
-			#if (haxe >= "4.0.0")
 			var isNumber:Bool = AlphaCharacter.numbers.contains(splitWords[loopNum]);
 			var isSymbol:Bool = AlphaCharacter.symbols.contains(splitWords[loopNum]);
-			#else
-			var isNumber:Bool = AlphaCharacter.numbers.indexOf(splitWords[loopNum]) != -1;
-			var isSymbol:Bool = AlphaCharacter.symbols.indexOf(splitWords[loopNum]) != -1;
-			#end
 
 			if (AlphaCharacter.alphabet.indexOf(splitWords[loopNum].toLowerCase()) != -1 || isNumber || isSymbol)
-				// if (AlphaCharacter.alphabet.contains(splitWords[loopNum].toLowerCase()) || isNumber || isSymbol)
-
 			{
-				if (lastSprite != null && !xPosResetted)
-				{
+				if (lastSprite != null && !xPosResetted) {
 					lastSprite.updateHitbox();
 					xPos += lastSprite.width + 3;
-					// if (isBold)
-					// xPos -= 80;
 				}
 				else
-				{
 					xPosResetted = false;
-				}
 
-				if (lastWasSpace)
-				{
+				if (lastWasSpace) {
 					xPos += 20;
 					lastWasSpace = false;
 				}
-				// trace(_finalText.fastCodeAt(loopNum) + " " + _finalText.charAt(loopNum));
 
-				// var letter:AlphaCharacter = new AlphaCharacter(30 * loopNum, 0);
 				var letter:AlphaCharacter = new AlphaCharacter(xPos, 55 * yMulti);
 				letter.row = curRow;
-				if (isBold)
-				{
+				if (isBold) {
 					letter.createBold(splitWords[loopNum]);
 				}
 				else
 				{
 					if (isNumber)
-					{
 						letter.createNumber(splitWords[loopNum]);
-					}
 					else if (isSymbol)
-					{
 						letter.createSymbol(splitWords[loopNum]);
-					}
 					else
-					{
 						letter.createLetter(splitWords[loopNum]);
-					}
 
 					letter.x += 90;
-				}
-
-				if (FlxG.random.bool(40))
-				{
-					var daSound:String = "GF_";
-					FlxG.sound.play(Paths.soundRandom(daSound, 1, 4));
 				}
 
 				add(letter);
@@ -255,7 +238,11 @@ class Alphabet extends FlxSpriteGroup
 			var scaledY = FlxMath.remapToRange(targetY, 0, 1, 0, 1.3);
 
 			y = FlxMath.lerp(y, (scaledY * 120) + (FlxG.height * 0.48), 0.16);
-			x = FlxMath.lerp(x, (targetY * 20) + 90, 0.16);
+
+			if (optionItem)
+				x = FlxMath.lerp(x, (targetY * 20 * 3) + 90 * 1.1, 0.16);
+			else
+				x = FlxMath.lerp(x, (targetY * 20) + 90, 0.16);
 		}
 
 		super.update(elapsed);
@@ -323,12 +310,23 @@ class AlphaCharacter extends FlxSprite
 			case "'":
 				animation.addByPrefix(letter, 'apostraphie', 24);
 				animation.play(letter);
-				y -= 0;
 			case "?":
 				animation.addByPrefix(letter, 'question mark', 24);
 				animation.play(letter);
 			case "!":
 				animation.addByPrefix(letter, 'exclamation point', 24);
+				animation.play(letter);
+			case "$": 
+				animation.addByPrefix(letter, 'dollarsign', 24);
+				animation.play(letter);
+			case "}":
+				animation.addByPrefix(letter, 'end parentheses', 24);
+				animation.play(letter);
+			case "{":
+				animation.addByPrefix(letter, 'start parentheses', 24);
+				animation.play(letter);
+			default:
+				animation.addByPrefix(letter, letter, 24);
 				animation.play(letter);
 		}
 
