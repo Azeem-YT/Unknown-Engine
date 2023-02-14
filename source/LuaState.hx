@@ -892,7 +892,7 @@ class LuaState
 		}
 	}
 
-	public function easeFromString(ease:String):FlxEase {
+	public function easeFromString(ease:String) {
 		switch(ease.toLowerCase().trim()) {
 			case 'backin': return FlxEase.backIn;
 			case 'backinout': return FlxEase.backInOut;
@@ -983,7 +983,7 @@ class LuaSprite extends FlxSprite
 
 			animation.play(animName, forced, reversed, framerate);
 
-			if (animOffsets.exists(name))
+			if (animOffsets.exists(animName))
 				offset.set(offsets[0], offsets[1]);
 			else
 				offset.set(0, 0);
