@@ -27,6 +27,7 @@ import flixel.util.FlxTimer;
 import io.newgrounds.NG;
 import lime.app.Application;
 import openfl.Assets;
+import haxe.Http;
 
 using StringTools;
 
@@ -39,17 +40,19 @@ class TitleState extends MusicBeatState
 	var credTextShit:Alphabet;
 	var textGroup:FlxGroup;
 	var ngSpr:FlxSprite;
+	var versionsMatch:Bool = true;
 	var gfLoaded:Bool;
 
 	var curWacky:Array<String> = [];
 
 	var wackyImage:FlxSprite;
 
+	public static var currentVersion:String = "0.1.0";
+	public static var latestVersion:String = null;
+
 	override public function create():Void
 	{
-		#if polymod
-		polymod.Polymod.init({modRoot: "mods", dirs: ['introMod']});
-		#end
+		versionsMatch = true;
 
 		FlxG.save.bind('funkin', 'ninjamuffin99');
 
@@ -67,6 +70,22 @@ class TitleState extends MusicBeatState
 		// DEBUG BULLSHIT
 
 		super.create();
+
+		#if desktop
+		var updateData:Http = new Http("https://raw.githubusercontent.com/Azeem-YT/Unknown-Engine/main/.github/gitVersion.txt");
+
+		updateData.onError = function(error) {
+			trace(error);
+		}
+
+		updateData.onData = function(data:String) {
+			latestVersion = data.split("\n")[0].trim();
+			if (latestVersion != null && latestVersion != currentVersion)) {
+				trace("This is an outdated version!!");
+				versionsMatch = false;
+			}
+		}
+		#end
 
 		Highscore.load();
 
@@ -270,9 +289,11 @@ class TitleState extends MusicBeatState
 			new FlxTimer().start(2, function(tmr:FlxTimer)
 			{			
 				Main.gameSettings.resetSettings();
-				ClassShit.switchState(new MainMenuState());
+				if (!versionsMatch)
+					ClassShit.switchState(new OutdatedState());
+				else
+					ClassShit.switchState(new MainMenuState());
 			});
-			// FlxG.sound.play(Paths.music('titleShoot'), 0.7);
 		}
 
 		if (pressedEnter && !skippedIntro)
