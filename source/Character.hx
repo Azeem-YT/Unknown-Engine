@@ -91,7 +91,6 @@ class Character extends FlxSprite
 	public var singDuration:Float = 4;
 	public var playerOffset:Array<Float> = [];
 	public var usedOnStrum:Bool = false;
-	public var ignoreList:Array<String> = ['idle', 'danceRight', 'danceLeft', 'singLEFT', 'singRIGHT', 'singDOWN', 'singUP'];
 
 	public var healthIcon:String;
 
@@ -156,7 +155,6 @@ class Character extends FlxSprite
 				addOffset("singRIGHT", -51);
 				addOffset("singLEFT", -30);
 				addOffset("singDOWN", -30, -40);
-				healthIcon = 'icon-monster';
 				playAnim('idle');
 			case 'monster-christmas':
 				tex = Paths.getSparrowAtlas('christmas/monsterChristmas');
@@ -172,8 +170,8 @@ class Character extends FlxSprite
 				addOffset("singRIGHT", -51);
 				addOffset("singLEFT", -30);
 				addOffset("singDOWN", -40, -94);
-				healthIcon = 'icon-monster';
 				playAnim('idle');
+				healthIcon = 'monster';
 
 			case 'spirit':
 				frames = Paths.getPackerAtlas('weeb/spirit');
@@ -221,54 +219,13 @@ class Character extends FlxSprite
 				addOffset("singDOWN-alt", -30, -27);
 
 				playAnim('idle');
-
-			case 'tankman':
-				frames = Paths.getSparrowAtlas('characters/tankmanCaptain');
-				quickAnimAdd("idle", "Tankman Idle Dance");
-				if (isPlayer)
-				{
-					quickAnimAdd("singLEFTmiss", "Tankman Note Left MISS");
-					quickAnimAdd("singRIGHTmiss", "Tankman Right Note MISS");
-				}
-				else
-				{
-					quickAnimAdd("singLEFTmiss", "Tankman Right Note MISS");
-					quickAnimAdd("singRIGHTmiss", "Tankman Note Left MISS");
-				}
-
-				quickAnimAdd("singLEFT", "Tankman Right Note 1");
-				quickAnimAdd("singRIGHT", "Tankman Note Left 1");
-
-				quickAnimAdd("singUP", "Tankman UP note 1");
-				quickAnimAdd("singDOWN", "Tankman DOWN note 1");
-				quickAnimAdd("singUPmiss", "Tankman UP note MISS");
-				quickAnimAdd("singDOWNmiss", "Tankman DOWN note MISS");
-				quickAnimAdd("singDOWN-alt", "PRETTY GOOD");
-				quickAnimAdd("singUP-alt", "TANKMAN UGH");
-				
-				addOffset('idle', 0, 0);
-				addOffset('singUP', 24, 56);
-				addOffset('singRIGHT', -1, -7);
-				addOffset('singLEFT', 100, -14);
-				addOffset('singDOWN', 98, -90);
-				addOffset('singUPmiss', 53, 84);
-				addOffset('singRIGHTmiss', -1, -3);
-				addOffset('singLEFTmiss', -30, 16);
-				addOffset('singDOWNmiss', 69, -99);
-				addOffset('singUP-alt');
-				addOffset('singDOWN-alt');
-
-				playAnim("idle");
-
-				flipX = true;
-
 			default:
-				var path = UnkownEngineHelpers.getCharJson(curCharacter);
+				var path = UnkownEngineHelpers.getCharJson(curCharacter, isPlayer);
 
 				if (!FileSystem.exists(path))
 				{
 					curCharacter = 'bf';
-					path = UnkownEngineHelpers.getCharJson(curCharacter);
+					path = UnkownEngineHelpers.getCharJson(curCharacter, isPlayer);
 				}
 
 				data = Json.parse(File.getContent(path));
@@ -303,7 +260,7 @@ class Character extends FlxSprite
 				if (data.healthIcon != null && data.healthIcon != '')
 					healthIcon = data.healthIcon;
 				else
-					healthIcon = 'icon-face';
+					healthIcon = 'face';
 
 				healthIconIsAnimated = data.animatedIcon;
 
@@ -409,7 +366,7 @@ class Character extends FlxSprite
 		}
 
 		if (healthIcon == null)
-			healthIcon = 'icon-' + curCharacter;
+			healthIcon = curCharacter;
 
 		getIdle();
 		dance();
@@ -464,6 +421,13 @@ class Character extends FlxSprite
 					playAnim('idle', true);
 			}
 
+			if (animation.curAnim.name.startsWith("hey") || animation.curAnim.name.startsWith("hey")) {
+				if (heyTimer >= Conductor.stepCrochet * 0.001 * 2) {
+					dance();
+					holdTimer = 0;
+				}
+			}
+
 			if (!isPlayer && holdTimer >= Conductor.stepCrochet * 0.001 * singDuration) {
 				dance();
 				holdTimer = 0;
@@ -500,13 +464,7 @@ class Character extends FlxSprite
 		if (animation.curAnim != null) {
 			if (animation.curAnim.finished && !canIdle)
 				canIdle = true;
-
-			if (animation.curAnim.finished && !ignoreList.contains(animation.curAnim.name))
-				dance();
 		}
-
-		if (!ignoreList.contains(idleDance))
-			ignoreList.push(idleDance);
 
 		super.update(elapsed);
 	}
@@ -553,9 +511,18 @@ class Character extends FlxSprite
 		}
 	}
 
+	public function playHey() {
+		if (curCharacter == 'gf')
+			playAnim("cheer", true);
+		else
+			playAnim("hey", true);
+
+		heyTimer = 0.20;
+	}
+
 	public function playAnim(AnimName:String, Force:Bool = false, Reversed:Bool = false, Frame:Int = 0):Void
 	{
-		if (animOffsets.exists(AnimName))
+		if (animOffsets.exists(AnimName) && animation.getByName(AnimName) != null)
 		{
 			animation.play(AnimName, Force, Reversed, Frame);
 
@@ -636,7 +603,6 @@ class Character extends FlxSprite
 		healthIcon = null;
 		idleOnBeat = 2;
 		canSing = true;
-		ignoreList = [idleDance, 'danceRight', 'danceLeft', 'singLEFT', 'singRIGHT', 'singDOWN', 'singUP'];
 		animOffsets.clear();
 	}
 }

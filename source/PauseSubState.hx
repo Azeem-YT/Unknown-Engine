@@ -12,6 +12,7 @@ import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
+import flixel.FlxCamera;
 
 class PauseSubState extends MusicBeatSubstate
 {
@@ -26,7 +27,7 @@ class PauseSubState extends MusicBeatSubstate
 	];
 
 	var curMenu:String = 'pause';
-	var difficultyChoices:Array<String> = ['EASY', 'NORMAL', 'HARD', 'BACK'];
+	var difficultyChoices:Array<String> = ['EASY', 'NORMAL', 'HARD'];
 
 	var menuItems:Array<String> = [];
 	var curSelected:Int = 0;
@@ -34,6 +35,8 @@ class PauseSubState extends MusicBeatSubstate
 	var pauseMusic:FlxSound;
 
 	var practiceText:FlxText;
+
+	var camPAUSE:FlxCamera;
 
 	public function new(x:Float, y:Float)
 	{
@@ -98,8 +101,13 @@ class PauseSubState extends MusicBeatSubstate
 		add(grpMenuShit);
 
 		difficultyChoices = PlayState.diffArray;
+		difficultyChoices.push("BACK");
 
 		regenMenu();
+
+		camPAUSE = FlxG.cameras.list[FlxG.cameras.list.length - 1];
+		camPAUSE.zoom = 1;
+		cameras = [camPAUSE];
 	}
 
 	private function regenMenu():Void
@@ -187,12 +195,6 @@ class PauseSubState extends MusicBeatSubstate
 						FlxG.resetState();
 					}
 			}
-		}
-
-		if (FlxG.keys.justPressed.J)
-		{
-			// for reference later!
-			// PlayerSettings.player1.controls.replaceBinding(Control.LEFT, Keys, FlxKey.J, null);
 		}
 	}
 

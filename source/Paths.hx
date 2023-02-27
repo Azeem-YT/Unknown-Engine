@@ -23,8 +23,9 @@ class Paths
 	public static var modInst:Map<String, Sound> = new Map<String, Sound>();
 	public static var modVoices:Map<String, Sound> = new Map<String, Sound>();
 	public static var loadedSounds:Map<String, Sound> = new Map<String, Sound>();
+	public static var currentSongDir:String = 'assets/songs/tutorial';
 
-	static var currentLevel:String = 'assets';
+	static var currentLevel:String = 'assets/';
 
 	static public function setCurrentLevel(name:String) {
 	 	currentLevel = name.toLowerCase();
@@ -207,16 +208,20 @@ class Paths
 		return getPath('images/$key.png', IMAGE, library);
 	}
 
+	inline static public function imagePth(key:String, ?library:String)
+		return getPath('images/$key.png', IMAGE, library);
+
 	inline static public function mp3(key:String, ?library:String):Any {
 		#if desktop
 		var soundFile:Sound = null;
+		var modKey:String = 'sounds/$key.mp3';
 
-		if (FileSystem.exists(key))
+		if (FileSystem.exists(modKey))
 		{
-			if (!loadedSounds.exists(key))
-				loadedSounds.set(key, Sound.fromFile(key));
+			if (!loadedSounds.exists(modKey))
+				loadedSounds.set(key, Sound.fromFile(modKey));
 
-			soundFile = loadedSounds.get(key);
+			soundFile = loadedSounds.get(modKey);
 		}
 
 		if (soundFile != null)
@@ -326,15 +331,14 @@ class Paths
 	inline static public function modTxt(key:String = '')
 		return mods('$key.txt');
 
-	inline static public function modvoices(song:String)
-	{
-		var songLowerCase:String = song.toLowerCase();
-		return 'mods/songs/' + songLowerCase + '/Voices.$SOUND_EXT';
+	inline static public function modvoices(song:String) {
+		var path:String = mods('songs/$song/Voices.$SOUND_EXT');
+		return path;
 	}
 
 	inline static public function modinst(song:String) {
-		var songLowerCase:String = song.toLowerCase();
-		return 'mods/songs/$songLowerCase/Inst.$SOUND_EXT';
+		var path:String = mods('songs/$song/Inst.$SOUND_EXT');
+		return path;
 	}
 
 	inline static public function modFonts(key:String)

@@ -11,6 +11,7 @@ using StringTools;
 class PlayerController
 {
 	public static var playerControl:Controls;
+	public static var player2:Controls;
 	public static var activePlayers:Array<Controls> = [];
 	public static var id:Int = 0;
 	
@@ -35,6 +36,7 @@ class PlayerController
 			
 			if (keyData != null) {
 				useDefault = false;
+				trace("loaded key data: " + haxe.Json.stringify(keyData));
 				playerControl.fromSaveData(keyData, Keys);
 			}
 		}
@@ -49,32 +51,21 @@ class PlayerController
 			FlxG.save.data.controls = {};
 		
 		var playerData:{ ?keys:Dynamic, ?pad:Dynamic }
-		if (id == 0)
-		{
+		if (id == 0) {
 			if (FlxG.save.data.controls.p1 == null)
 				FlxG.save.data.controls.p1 = {};
 			playerData = FlxG.save.data.controls.p1;
 		}
-		else
-		{
+		else {
 			if (FlxG.save.data.controls.p2 == null)
 				FlxG.save.data.controls.p2 = {};
 			playerData = FlxG.save.data.controls.p2;
 		}
 		
 		var keyData = playerControl.createSaveData(Keys);
+		trace("saving key data: " + haxe.Json.stringify(keyData));
 		if (keyData != null) {
 			playerData.keys = keyData;
-		}
-		
-		if (playerControl.gamepadsAdded.length > 0)
-		{
-			var padData = playerControl.createSaveData(Gamepad(playerControl.gamepadsAdded[0]));
-			if (padData != null)
-			{
-				trace("saving pad data: " + haxe.Json.stringify(padData));
-				playerData.pad = padData;
-			}
 		}
 		
 		FlxG.save.flush();

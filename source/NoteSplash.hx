@@ -11,6 +11,7 @@ import helpers.*;
 import openfl.utils.Assets;
 import haxe.Json;
 import haxe.format.JsonParser;
+import shaderslmfao.ColorSwap;
 
 using StringTools;
 
@@ -32,7 +33,7 @@ typedef SplashShit = {
 
 class NoteSplash extends FlxSprite
 {
-    public var texture:String;
+    public var texture(default, set):String;
     public var anim:String;
     public var textureLoaded:Bool = false;
     public var textureOverride:String = null;
@@ -42,45 +43,45 @@ class NoteSplash extends FlxSprite
     public var animList:Array<String> = [];
     public var noteColors:Array<String> = ['purple', 'blue', 'green', 'red'];
     public var useJson:Bool = false;
+    public var colorSwap:ColorSwap;
 
     public function new(x:Float, y:Float, noteData:Int, splashID:String = 'default'){
         super(x, y);
+
+        var textureShit:String = 'noteSplashes';
 
         #if desktop
         if (FileSystem.exists(Paths.modJson('noteSplashes/' + splashID))) {
             useJson = true;
             jsonPath = Paths.modJson('noteSplashes/' + splashID);
             splashData = Json.parse(File.getContent(jsonPath));
-            texture = splashData.splashTexture;
+            textureShit = splashData.splashTexture;
         }
         else #end if (Assets.exists(Paths.json('noteSplashes/' + splashID))) {
             useJson = true;
             jsonPath = Paths.json('noteSplashes/' + splashID);
             splashData = Json.parse(File.getContent(jsonPath));
-            texture = splashData.splashTexture;
+            textureShit = splashData.splashTexture;
         }
         else {
-            trace("Couldn't Find the note splash json with the ID " + splashID);
-            trace('Mod Path: mods/noteSplashes/' + splashID + '.json');
-            trace('Asset Path: ' + Paths.json('noteSplashes/' + splashID));
-
             useJson = false;
-            texture = 'noteSplashes';
+            textureShit = 'noteSplashes';
             splashData = null;
         }
 
-        addAnims(texture);
+        texture = textureShit;
 
-        addSplash(x, y, noteData);
+        colorSwap = new ColorSwap();
+        shader = colorSwap.shader;
+		colorSwap.update(Note.arrowColors[noteData]);
+
         antialiasing = true;
     }
 
     public function addSplash(x:Float, y:Float, noteData:Int, ?texture:String)
     {
-        if (textureOverride != null && textureOverride != texture) {
+        if (textureOverride != null && textureOverride != texture)
             this.texture = textureOverride;
-            addAnims(textureOverride);
-        }
 
         anim = noteColors[noteData];
 
@@ -95,6 +96,64 @@ class NoteSplash extends FlxSprite
             alpha = 0.8;
 
         playAnim(anim);
+    }
+    
+    inline function set_texture(str:String):String {
+        frames = Paths.getSparrowAtlas('noteSplashes/' + str);
+
+        if (frames == null)
+            frames = Paths.getSparrowAtlas('noteSplashes/noteSplashes');
+
+        var randomInt:Int = FlxG.random.int(1, 2);
+
+        var anim:String = 'note impact ' + randomInt + ' ';
+        var animData:Array<String> = [];
+        var animPrefixs:Array<String> = [];
+
+        if (useJson && splashData != null) {
+            for (i in 0...splashData.splashAnims.length) {
+                if (splashData.splashAnims[i].hasRandom) {
+                    animPrefixs.push(splashData.splashAnims[i].prefix);
+                    var splitData:Array<String> = [];
+                    var animToAdd:String = '';
+
+                    splitData = splashData.splashAnims[i].anim.split("split");
+                    animToAdd = splitData[0] + randomInt;
+                    if (splitData[1] == null)
+                        animToAdd += '';
+                    else
+                        animToAdd += splitData[1];
+
+                    animData.push(animToAdd);
+                }
+            }
+        }
+        
+        if (useJson && splashData != null)
+        {
+           if (splashData.useFrames) {
+                for (i in 0...splashData.splashAnims.length)
+                    animation.add(noteColors[i], splashData.splashAnims[i].splashFrames, splashData.splashAnims[i].frames, false);
+           }
+           else {
+                for (i in 0...splashData.splashAnims.length)
+                    animation.addByPrefix(noteColors[i], animData[i], splashData.splashAnims[i].frames, false);
+           }
+        }
+        else
+        {
+            animation.addByPrefix('purple', anim + 'purple', 24, false);
+            animation.addByPrefix('blue', anim + 'blue', 24, false);
+            animation.addByPrefix('green', anim + 'green', 24, false);
+            animation.addByPrefix('red', anim + 'red', 24, false);
+        }
+
+        animList = animation.getNameList();
+
+        if (frames != null)
+            textureLoaded = true;
+
+        return str;
     }
 
     function addAnims(texture:String)

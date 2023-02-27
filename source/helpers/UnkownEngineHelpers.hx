@@ -4,70 +4,50 @@ import flixel.FlxG;
 import openfl.utils.AssetType;
 import sys.FileSystem;
 import sys.io.File;
+import lime.utils.Assets;
+import flixel.FlxSprite;
 
 using StringTools;
 
 class UnkownEngineHelpers
 {
-    public static var moduleStarted:Bool = false;
-    public static var foundCharFiles:Array<String> = [];
-
-    public static function getCustomPath(file:String, type:AssetType, ?library:Null<String>, isMod:Bool = false)
-    {
-        return Paths.getPath(file, type, library);
-    }
-
-    public static function getShaderFile(type:String, file:String, isMod:Bool = false)
-    {
-        var daType:String = type.toLowerCase();
-
-        #if desktop
-        if (isMod)
-        {
-            switch (daType)
-            {
-               case 'frag' | 'fragment':
-                    return File.getContent('mods/shaders/$file.frag');
-               case 'verg' | 'vertex':
-                    return File.getContent('mods/shaders/$file.verg');
-            }
-        }
-        else
-        {
-           switch (daType)
-           {
-                case 'frag' | 'fragment':
-                    return File.getContent('assets/shaders/$file.frag');
-                case 'verg' | 'vertex':
-                    return File.getContent('assets/shaders/$file.verg');
-           }
-        }
-        #else
-        switch (daType)
-        {
-            case 'frag' | 'fragment':
-                return File.getContent('assets/shaders/$file.frag');
-            case 'verg' | 'vertex':
-                return File.getContent('assets/shaders/$file.verg');
-        }
-        #end
-
-        return return File.getContent('assets/shaders/$file.frag');
-    }
-
-    public static function resetGame()
-    {
+    public static function resetGame() {
         trace("Reseting Game");
         FlxG.resetGame();
     }
 
-    public static function getCharJson(char:String)
+    public static function getImagePixelWidth(texture:String = ''):Int {
+        if (texture != null && texture != '') {
+            var sprite:FlxSprite = new FlxSprite().loadGraphic(Paths.image(texture));
+
+            if (sprite != null)
+                return Math.floor(sprite.width / 4);
+        }
+
+        return 0;
+    }
+    
+    public static function getImagePixelHeight(texture:String = ''):Int {
+        if (texture != null && texture != '') {
+            var sprite:FlxSprite = new FlxSprite().loadGraphic(Paths.image(texture));
+            if (sprite != null)
+                return Math.floor(sprite.height / 5);
+        }
+
+        return 0;
+    }
+
+    public static function getCharJson(char:String, isPlayer:Bool = false)
     {
-        #if desktop
-        if (FileSystem.exists('mods/characters/' + char + '.json'))
-            return 'mods/characters/$char.json';
-        else
-        #end
-            return 'assets/characters/$char.json';
+        if (FileSystem.exists(Paths.mods('characters/$char-player.json')))
+            return Paths.mods('characters/$char-player.json');
+
+        if (FileSystem.exists(Paths.mods('characters/$char.json')))
+            return Paths.mods('characters/$char.json');
+
+        if (Assets.exists(Paths.getPreloadPath('characters/$char-player.json')))
+            return Paths.getPreloadPath('characters/$char-player.json');
+
+        return Paths.getPreloadPath('characters/$char.json');
     }
 }

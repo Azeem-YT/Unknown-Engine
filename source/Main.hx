@@ -10,7 +10,6 @@ import openfl.display.Sprite;
 import openfl.events.Event;
 import haxe.CallStack.StackItem;
 import haxe.CallStack;
-import optionHelpers.GameSettings;
 import openfl.events.UncaughtErrorEvent;
 import sys.FileSystem;
 import sys.io.File;
@@ -25,10 +24,10 @@ class Main extends Sprite
 	var zoom:Float = -1; // If -1, zoom is automatically calculated to fit the window dimensions.
 	var skipSplash:Bool = true; // Whether to skip the flixel splash screen that appears in release mode.
 	var startFullscreen:Bool = false;
-	public static var gameSettings:GameSettings;
 	public static var notifGroup:NotificationGroup;
 	public static var gotFPS:Bool = false;
 	public static var fpsCap:Float = 60;
+	public static var loggedErrors:Array<String> = [];
 
 	// You can pretty much ignore everything from here on - your code should go in your states.
 
@@ -85,14 +84,17 @@ class Main extends Sprite
 
 		addChild(new FlxGame(gameWidth, gameHeight, initialState, zoom, 60, 60, skipSplash, startFullscreen));
 		
-		gameSettings = new GameSettings();
-
 		trace("Starting...");
 	}
 
 	private override function __update(transformOnly:Bool, updateChildren:Bool)
 	{
 		super.__update(transformOnly, updateChildren); //If you wanna update something in Main.
+
+		#if debug
+		if (FlxG.keys.justPressed.Y)
+			gameCrashed(null);
+		#end
 	}
 
 	public static function setFramerateCap(cap:Float)
@@ -131,7 +133,7 @@ class Main extends Sprite
 			framerateCounter.visible = PlayerPrefs.fpsCounter;
 	}
 
-	public function gameCrashed(errorMsg:UncaughtErrorEvent)
+	public static function gameCrashed(errorMsg:UncaughtErrorEvent)
 	{
 		var error:String = "Game Crashed!\n";
 		var crashPath:String;
@@ -154,10 +156,21 @@ class Main extends Sprite
 					error += file + " (line " + line + ")\n";
 				default:
 					Sys.println(stackItem);
+					error += Std.string(stackItem);
 			}
 		}
 
-		error += 'nUncaught Error: ' + errorMsg.error + '\nThis is most likey because this version is unfinished. Check for Updates! ';
+		error += 'Logged Errors: \n';
+		for (i in 0...loggedErrors.length) {
+			error += '\n' + loggedErrors[i];
+		}
+
+		var errorShit:String = 'Unknown';
+
+		if (errorMsg != null)
+			errorShit = errorMsg.error;
+
+		error += '\nUncaught Error: ' + errorShit + '\nThis is most likey because this version is unfinished. Check for Updates! ';
 
 		File.saveContent(crashPath, error + "\n");
 

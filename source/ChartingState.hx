@@ -78,6 +78,7 @@ class ChartingState extends MusicBeatState
 
 	var typingShit:FlxInputText;
 	var splashShit:FlxInputText;
+	var typedNoteTexture:FlxInputText;
 	/*
 	 * WILL BE THE CURRENT / LAST PLACED NOTE
 	**/
@@ -151,8 +152,7 @@ class ChartingState extends MusicBeatState
 				player1: 'bf',
 				player2: 'dad',
 				gfVersion: 'gf',
-				notePlayerTexture: 'normal',
-				noteOpponentTexture: 'normal',
+				arrowTexture: 'NOTE_assets',
 				splashJson: 'default',
 				numbPlayers: 2,
 				#if desktop
@@ -322,7 +322,6 @@ class ChartingState extends MusicBeatState
 		stepperBPM.name = 'song_bpm';
 
 		var girlfriendVersion:Array<String> = CoolUtil.coolTextFile(Paths.txt('data/girlfriendVersionList'));
-		var noteTexVer:Array<String> = CoolUtil.coolTextFile(Paths.txt('data/noteTexList'));
 
 		var allChars:Array<String> = characterList;
 		var totalStages:Array<String> = stageList;
@@ -339,37 +338,41 @@ class ChartingState extends MusicBeatState
 
 			if (FileSystem.isDirectory(dirPath))
 			{
+
 				for (file in FileSystem.readDirectory(dirPath))
 				{
-					var path = haxe.io.Path.join([dirPath, file]);
-					if (file.endsWith('.json'))
-					{
+					if (file.endsWith('.json')) {
 						var characterToPush:String = StringTools.replace(file, ".json", "");
 
 						if (!characterList.contains(characterToPush))
 							allChars.push(characterToPush);
 					}
 				}
+
 			}
 		}
 
-		for (i in 0...directorys.length)
-		{
-			var dirPath:String = directorys[1] + 'stages';
+		for (i in 0...directorys.length) {
+			var dirPath:String = directorys[1] + 'stages/';
 
 			if (FileSystem.isDirectory(dirPath))
 			{
-				for (file in FileSystem.readDirectory(dirPath))
-				{
-					var path = haxe.io.Path.join([dirPath, file]);
-					if (file.endsWith('.hxs'))
-					{
+
+				for (file in FileSystem.readDirectory(dirPath)){
+					if (file.endsWith('.hxs')) {
 						var fileToPush:String = StringTools.replace(file, ".hxs", "");
 
 						if (!totalStages.contains(fileToPush))
 							totalStages.push(fileToPush);
 					}
+					else if (file.endsWith('.lua')) {
+						var fileToPush:String = StringTools.replace(file, ".lua", "");
+
+						if (!totalStages.contains(fileToPush))
+							totalStages.push(fileToPush);
+					}
 				}
+
 			}
 		}
 
@@ -399,28 +402,13 @@ class ChartingState extends MusicBeatState
 		gfVersionDropDown.selectedLabel = _song.gfVersion;
 		gfVersionDropDown.dropDirection = FlxUIDropDownMenuDropDirection.Down;
 
-		var playerNoteTexDropDown = new EditorDropDown(140, 150, FlxUIDropDownMenu.makeStrIdLabelArray(noteTexVer, true), function(noteTex:String)
-		{
-			_song.notePlayerTexture = noteTexVer[Std.parseInt(noteTex)];
-		});
-
-		playerNoteTexDropDown.selectedLabel = _song.notePlayerTexture;
-		playerNoteTexDropDown.dropDirection = FlxUIDropDownMenuDropDirection.Down;
-
-		var noteOpponentTexDropDown = new EditorDropDown(140, 200, FlxUIDropDownMenu.makeStrIdLabelArray(noteTexVer, true), function(noteTex:String)
-		{
-			_song.noteOpponentTexture = noteTexVer[Std.parseInt(noteTex)];
-		});
-
-		noteOpponentTexDropDown.selectedLabel = _song.noteOpponentTexture;
+		var noteTexture = new FlxUIInputText(140, 200, 70, _song.splashJson, 8);
+		typedNoteTexture = noteTexture;
 		
 		var stageDropDown = new EditorDropDown(140, 250, FlxUIDropDownMenu.makeStrIdLabelArray(stageList, true), function(stage:String)
 		{
 			_song.stage = stageList[Std.parseInt(stage)];
 		});
-
-		playerNoteTexDropDown.selectedLabel = _song.stage;
-		playerNoteTexDropDown.dropDirection = FlxUIDropDownMenuDropDirection.Down;
 
 		var tab_group_song = new FlxUI(null, UI_box);
 		tab_group_song.name = "Song";
@@ -440,8 +428,7 @@ class ChartingState extends MusicBeatState
 		tab_group_song.add(player1DropDown);
 		tab_group_song.add(player2DropDown);
 		tab_group_song.add(gfVersionDropDown);
-		tab_group_song.add(playerNoteTexDropDown);
-		tab_group_song.add(noteOpponentTexDropDown);
+		tab_group_song.add(noteTexture);
 		tab_group_song.add(stageDropDown);
 
 		UI_box.addGroup(tab_group_song);
@@ -692,12 +679,8 @@ class ChartingState extends MusicBeatState
 
 		Conductor.songPosition = FlxG.sound.music.time;
 		_song.song = typingShit.text;
-
-		#if desktop
-		if (FileSystem.exists(Paths.modJson('noteSplashes/' + splashShit.text)))
-			_song.splashJson = splashShit.text;
-		else #end if (Assets.exists(Paths.json('noteSplashes/' + splashShit.text)))
-			_song.splashJson = splashShit.text;
+		_song.arrowTexture = typedNoteTexture.text;
+		_song.splashJson = splashShit.text;
 
 		strumLine.y = getYfromStrum((Conductor.songPosition - sectionStartTime()) % (Conductor.stepCrochet * _song.notes[curSection].lengthInSteps));
 

@@ -24,15 +24,14 @@ typedef SwagSong =
 	var player2:String;
 	var gfVersion:String;
 	var stage:String;
-	var notePlayerTexture:String;
-	var noteOpponentTexture:String;
+	var arrowTexture:String;
 	var numbPlayers:Int;
-	#if desktop
-	var events:Array<Dynamic>;
-	#end
 	var threePlayer:Bool;
 	var splashJson:String;
 	var validScore:Bool;
+	#if desktop
+	var events:Array<Dynamic>;
+	#end
 }
 
 class Song
@@ -56,18 +55,27 @@ class Song
 
 	public static function loadFromJson(jsonInput:String, ?folder:String):SwagSong
 	{
-		var rawJson;
+		var rawJson = null;
 		
 		#if desktop
-		if (FileSystem.exists(Paths.modJson('data/' + folder.toLowerCase() + '/' + jsonInput.toLowerCase())))
-		{
+		if (FileSystem.exists(Paths.modJson('data/' + folder.toLowerCase() + '/' + jsonInput.toLowerCase()))) {
 			rawJson = File.getContent(Paths.modJson('data/' + folder.toLowerCase() + '/' + jsonInput.toLowerCase()));
+			Paths.currentSongDir = Paths.mods('data/' + folder.toLowerCase() + '/');
 		}
-		else
-		#end
+		else {
+			if (Assets.exists(Paths.json('data/' + folder.toLowerCase() + '/' + jsonInput.toLowerCase()))) {
+				rawJson = Assets.getText(Paths.json('data/' + folder.toLowerCase() + '/' + jsonInput.toLowerCase())).trim();
+				Paths.currentSongDir = Paths.getPreloadPath('data/' + folder.toLowerCase() + '/');
+			}
+		}
+		#else
+		if (Assets.exists(Paths.json('data/' + folder.toLowerCase() + '/' + jsonInput.toLowerCase()))) {
 			rawJson = Assets.getText(Paths.json('data/' + folder.toLowerCase() + '/' + jsonInput.toLowerCase())).trim();
+			Paths.currentSongDir = Paths.getPreloadPath('data/' + folder.toLowerCase() + '/');
+		}
+		#end
 
-		while (!rawJson.endsWith("}"))
+		while (!rawJson.endsWith("}") && rawJson != null)
 		{
 			rawJson = rawJson.substr(0, rawJson.length - 1);
 			// LOL GOING THROUGH THE BULLSHIT TO CLEAN IDK WHATS STRANGE
@@ -89,7 +97,10 @@ class Song
 				daSong = songData.song;
 				daBpm = songData.bpm; */
 
-		return parseJSONshit(rawJson);
+		if (rawJson != null)
+			return parseJSONshit(rawJson);
+
+		return null;
 	}
 
 	public static function parseJSONshit(rawJson:String):SwagSong

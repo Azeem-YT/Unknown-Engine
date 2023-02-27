@@ -359,8 +359,6 @@ class FreeplayState extends MusicBeatState
 		{
 			var poop:String = Highscore.formatSong(songs[curSelected].songName.toLowerCase(), diff);
 
-			trace(poop);
-
 			PlayState.SONG = Song.loadFromJson(poop, songs[curSelected].songName.toLowerCase());
 			PlayState.isStoryMode = false;
 			PlayState.diffArray = diffArray;
@@ -368,7 +366,12 @@ class FreeplayState extends MusicBeatState
 
 			PlayState.storyWeek = songs[curSelected].week;
 			trace('CUR WEEK' + PlayState.storyWeek);
-			LoadingState.loadAndSwitchState(new PlayState());
+			if (PlayState.SONG != null)
+				LoadingState.loadAndSwitchState(new PlayState());
+			else {
+				ErrorState.song = songs[curSelected].songName;
+				ClassShit.switchState(new ErrorState());
+			}
 		}
 	}
 

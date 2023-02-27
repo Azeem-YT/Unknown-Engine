@@ -161,6 +161,7 @@ class DialogueCharacter extends FlxSprite
 class DialogueState extends FlxSpriteGroup
 {
    public var dialogueData:JsonData = null;
+   public var currentDialogue:DialogueThing = null;
    public var dialogueList:Array<String> = [];
    public var dialogueText:Alphabet;
 
@@ -221,12 +222,11 @@ class DialogueState extends FlxSpriteGroup
 		loadCharacters();
 		getDialogueList();
 		openDialogueBox();
-		setDialogueText('');
    }
 
    public function getDialogueList() {
 		for (data in dialogueData.dialogueData)
-			dialogueList.push(data.dialogue);
+			dialogueList.push(data.dialogue); 
    }
 
    public function openDialogueBox() {
@@ -248,9 +248,9 @@ class DialogueState extends FlxSpriteGroup
 		if (dialogueText != null)
 			remove(dialogueText);
 
-		setCharacter(dialogueData.dialogueData[curDialogue].char, dialogueData.dialogueData[curDialogue].animName);
+		setCharacter(currentDialogue.char, currentDialogue.animName);
 
-		dialogueText = new Alphabet(FlxG.width / 16, box.y + 50, text, false, true, dialogueData.dialogueData[curDialogue].dialogueSpeed);
+		dialogueText = new Alphabet(FlxG.width / 16, box.y + 50, text, false, true, true, currentDialogue.dialogueSpeed);
 		dialogueText.alpha = 1;
 		add(dialogueText);
    }
@@ -311,13 +311,15 @@ class DialogueState extends FlxSpriteGroup
 
    public function startDialogue() {
 		curDialogue = 0;
-		setDialogueText(dialogueList[0]);
+		currentDialogue = dialogueData.dialogueData[0];
+		setDialogueText(currentDialogue.dialogue);
    }
 
    public function continueDialogue() {
 		curDialogue++;
+		currentDialogue = dialogueData.dialogueData[curDialogue];
 		dialogueList.remove(dialogueList[0]);
-		setDialogueText(dialogueList[0]);
+		setDialogueText(currentDialogue.dialogue);
    }
 
    public function setCharacter(char:String = 'bf', ?animName:String = '') {
@@ -330,24 +332,8 @@ class DialogueState extends FlxSpriteGroup
 			invisibleChar = true;
 		}
 
-		if (!invisibleChar) {
+		if (!invisibleChar)
 			currentChar.playAnim(animName);
-			var moveBy:Float = 25;
-
-			switch (currentChar.alignment) {
-				case 'middle' | 'left':
-					currentChar.x -= 25;
-					moveBy = 25;
-				case 'right':
-					currentChar.x += 25;
-					moveBy = -25;
-				default:
-					currentChar.x -= 25;
-					moveBy = 25;
-			}
-
-			currentChar.alpha = 0;
-		}
    }
 
    public function loadCharacters() {
